@@ -70,9 +70,9 @@ By genre (test sample; each review carries one genre label; genres with fewer th
 Third rater file: used (1481 sentences rated).
 Rater agreement: A1-A2 Spearman 0.5432; Krippendorff's alpha (interval) two raters 0.4516, (ordinal) 0.4741; three raters 0.5829 (interval), 0.5993 (ordinal).
   A1-A2: Spearman 0.5432, exact 0.285, within one point 0.734
-  A1-GT: Spearman 0.7272, exact 0.388, within one point 0.845
-  A2-GT: Spearman 0.6456, exact 0.521, within one point 0.915
-  each rater against the mean of the other two (Spearman): A1 0.7109, A2 0.6304, GT 0.7840
+  A1-R3: Spearman 0.7272, exact 0.388, within one point 0.845
+  A2-R3: Spearman 0.6456, exact 0.521, within one point 0.915
+  each rater against the mean of the other two (Spearman): A1 0.7109, A2 0.6304, R3 0.7840
 Sentence-level evaluation on 1462 benchmark sentences (Spearman with the mean of two annotators; difference from VADER with 95% bootstrap CI, 1000 resamples):
   VADER                                   0.5706   coverage 0.8454   sign acc. 0.6335
   VADER + core                            0.6149   coverage 0.9371   sign acc. 0.7130   +0.0443 [+0.0286, +0.0604]

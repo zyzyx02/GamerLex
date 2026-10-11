@@ -1,48 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-GamerLex :: mondatszintu robusztussagi ellenorzesek a benchmarkon
-=================================================================
+GamerLex :: sentence-level robustness checks on the benchmark
+=============================================================
 
-MIERT KELL:
-    Az A1 es A2 annotator az annotalo lapon latta, hogy a review ajanlja-e a
-    jatekot. A GamerLex valenciai szinten az ajanlasbol szarmaznak, igy az
-    emberi ertekeles es a lexikon kozotti egyezes egy resze a lathato cimken
-    keresztul is letrejohet. Ez a szkript negy ellenorzest vegez:
-      1. minden ertekelo (A1, A2, GT) es minden lexikon korrelacioja a cimkevel;
-      2. cimken beluli Spearman: kulon az ajanlo es a nem ajanlo review-k
-         mondatain, a ket csoport elemszamaval sulyozva (a cimke hatasa igy
-         kiesik); paros bootstrap, a cimke szerint retegezve;
-      3. a "the"-reszminta: azok a mondatok, amelyek csak a korai jeloltlista
-         "the" tokenje miatt kerultek a benchmarkba, tehat gyakorlatilag
-         szuretlen mondatok (a kivalasztasi torzitas ellenorzese);
-      4. azok a mondatok, amelyekben nincs az audit soran hozzaadott kuralt
-         szo (az auditlapon latszott, hany benchmarkmondatban szerepel egy
-         szo; ez a kuralt szavak kivalasztasat befolyasolhatta).
-    Elotte a teljes mintan is kiszamolja a paros kulonbsegeket.
-    Mindegyik ellenorzes ket aranystandarddal fut: a harom ertekelo medianja,
-    illetve csak GT (o vakon, cimke nelkul ertekelt).
+WHY:
+    Annotators A1 and A2 saw on the annotation sheet whether the review
+    recommends the game. GamerLex valences are also derived from the
+    recommendation, so part of the agreement between human ratings and the
+    lexicon could arise through the visible label. This script runs four checks:
+      1. the correlation of every rater (A1, A2, R3) and every lexicon with the label;
+      2. within-label Spearman: computed separately on sentences from
+         recommending and from non-recommending reviews and weighted by group
+         size (this removes the effect of the label); paired bootstrap,
+         stratified by label;
+      3. the "the" subset: sentences that entered the benchmark only through the
+         token "the" of the early candidate list, i.e. practically unselected
+         sentences (a check of selection bias);
+      4. sentences without any curated term added during the audit (the audit
+         sheet showed in how many benchmark sentences a term occurs, which may
+         have influenced the selection of curated terms).
+    Before these, paired differences are computed on the whole benchmark.
+    Every check runs with two gold standards: the median of the three raters,
+    and the third rater (R3) alone, who rated blind, without the label.
 
-MIT OLVAS (a gamerlex_build.py kimenetei es a benchmark):
+INPUTS (outputs of gamerlex_build.py and the benchmark):
     release/GamerLex_v1.0.csv
     eval/GamerLex_induced_baseline.csv
     bench/bench_merged.csv
-    bench/gamerlex_bench_GT_vak.xlsx
-    lexicon_audit.xlsx                 (nem kotelezo; a 4. ellenorzeshez)
-    A mappat maga keresi: a szkript mappaja, az aktualis mappa
-    output/gamerslang almappaja, az aktualis mappa, H:/output/gamerslang.
-    Ha nem talalja, kiirja, hol kereste.
+    bench/bench_rater3.csv              (sentence_id, rating)
+    audit_added_terms.txt              (optional; for check 4; one term per line)
+    The folder is searched for: the script folder, output/gamerslang under the
+    working directory, and the working directory. If the files are not
+    found, the script prints where it looked.
 
-MIT IR:
-    eval/GamerLex_bench_robustness.txt    olvashato riport
-    eval/GamerLex_bench_robustness.json   ugyanez gepileg olvashatoan
-    Meglevo kimenetet csak --force eseten ir felul.
+OUTPUTS:
+    eval/GamerLex_bench_robustness.txt    readable report
+    eval/GamerLex_bench_robustness.json   the same, machine readable
+    Existing output is only overwritten with --force.
 
-HOGYAN FUTTASD (a H:/ gyokerbol):
-    python output\\gamerslang\\gamerlex_bench_robustness.py
-    python output\\gamerslang\\gamerlex_bench_robustness.py --force
+HOW TO RUN:
+    python gamerlex_bench_robustness.py
+    python gamerlex_bench_robustness.py --force
 
-Fuggosegek: pandas, numpy, openpyxl, vaderSentiment, valamint a
-gamerlex_build.py ugyanabban a mappaban. Futasido: par perc.
+Requirements: pandas, numpy, vaderSentiment, and gamerlex_build.py in the
+same folder. Run time: a few minutes.
 """
 
 import argparse
@@ -59,13 +60,13 @@ sys.path.insert(0, HERE)
 
 def find_dir():
     cwd = os.getcwd()
-    cands = [HERE, os.path.join(cwd, "output", "gamerslang"), cwd, r"H:\output\gamerslang"]
+    cands = [HERE, os.path.join(cwd, "output", "gamerslang"), cwd]
     need = [os.path.join("release", "GamerLex_v1.0.csv"), os.path.join("eval", "GamerLex_induced_baseline.csv"),
-            os.path.join("bench", "bench_merged.csv"), os.path.join("bench", "gamerlex_bench_GT_vak.xlsx")]
+            os.path.join("bench", "bench_merged.csv"), os.path.join("bench", "bench_rater3.csv")]
     for c in cands:
         if all(os.path.exists(os.path.join(c, n)) for n in need):
             return c
-    print("[HIBA] Nem talalom a szukseges fajlokat. Itt kerestem:")
+    print("[ERROR] Cannot find the required files. Looked in:")
     for c in cands:
         for n in need:
             print("   ", os.path.abspath(os.path.join(c, n)))
@@ -74,15 +75,15 @@ def find_dir():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--boot", type=int, default=2000, help="bootstrap ismetlesek szama")
+    ap.add_argument("--boot", type=int, default=2000, help="bootstrap resamples")
     ap.add_argument("--seed", type=int, default=46)
-    ap.add_argument("--force", action="store_true", help="meglevo kimenet felulirasa")
+    ap.add_argument("--force", action="store_true", help="overwrite existing output")
     args = ap.parse_args()
 
     try:
         import gamerlex_build as gb
     except ImportError:
-        print("[HIBA] A gamerlex_build.py-nak ugyanebben a mappaban kell lennie:", HERE)
+        print("[ERROR] gamerlex_build.py must be in the same folder:", HERE)
         sys.exit(1)
     from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as SIA
 
@@ -90,23 +91,23 @@ def main():
     out_txt = os.path.join(base, "eval", "GamerLex_bench_robustness.txt")
     out_json = os.path.join(base, "eval", "GamerLex_bench_robustness.json")
     if (os.path.exists(out_txt) or os.path.exists(out_json)) and not args.force:
-        print("[MEGALLTAM] Mar letezik kimenet, nem irom felul (--force kell):", out_txt)
+        print("[STOPPED] Output already exists; not overwriting it (use --force):", out_txt)
         sys.exit(1)
-    print("Mappa:", base)
+    print("Folder:", base)
 
-    gt = pd.read_excel(os.path.join(base, "bench", "gamerlex_bench_GT_vak.xlsx"), sheet_name="ertekeles")
-    gt["GT"] = pd.to_numeric(gt["GT_sentiment"], errors="coerce")
-    gt = gt[gt.GT.isin([-2, -1, 0, 1, 2])][["sentence_id", "GT"]].drop_duplicates("sentence_id")
+    r3 = pd.read_csv(os.path.join(base, "bench", "bench_rater3.csv"), encoding="utf-8-sig")
+    r3["R3"] = pd.to_numeric(r3["rating"], errors="coerce")
+    r3 = r3[r3.R3.isin([-2, -1, 0, 1, 2])][["sentence_id", "R3"]].drop_duplicates("sentence_id")
     bm = pd.read_csv(os.path.join(base, "bench", "bench_merged.csv"), encoding="utf-8-sig")
     bm["sentence"] = bm.sentence.astype(str)
     bm = bm[~bm.sentence.str.startswith("#NAME") & bm.A1_sent.notna() & bm.A2_sent.notna()]
-    b = bm.merge(gt, on="sentence_id", how="inner").reset_index(drop=True)
+    b = bm.merge(r3, on="sentence_id", how="inner").reset_index(drop=True)
     if len(b) < 100:
-        print("[HIBA] Tul keves mondat a harom ertekelovel:", len(b))
+        print("[ERROR] Too few sentences rated by all three raters:", len(b))
         sys.exit(1)
     A1 = b.A1_sent.astype(float).values
     A2 = b.A2_sent.astype(float).values
-    G = b.GT.astype(float).values
+    G = b.R3.astype(float).values
     med = np.median(np.vstack([A1, A2, G]), axis=0)
     y = b.recommended.astype(str).str.strip().str.lower().isin(["true", "1", "1.0"]).values
     golds = {"median of three raters": med, "third rater only (blind)": G}
@@ -136,17 +137,17 @@ def main():
     L = ["GamerLex :: sentence-level robustness checks", "=" * 60,
          f"Sentences rated by all three raters: {len(b)}; from recommending reviews: {int(y.sum())} ({y.mean():.1%}).", ""]
 
-    # 1. korrelacio a lathato cimkevel
+    # 1. correlation with the visible label
     yl = y.astype(float)
-    res["spearman_with_label"] = {"A1": gb.spearman(A1, yl), "A2": gb.spearman(A2, yl), "GT": gb.spearman(G, yl),
+    res["spearman_with_label"] = {"A1": gb.spearman(A1, yl), "A2": gb.spearman(A2, yl), "R3": gb.spearman(G, yl),
                                   "median of three raters": gb.spearman(med, yl)}
     res["spearman_lexicon_with_label"] = {k: gb.spearman(v, yl) for k, v in sc.items()}
-    L.append("1. Spearman correlation with the review label (A1 and A2 saw the label while rating, GT did not):")
+    L.append("1. Spearman correlation with the review label (A1 and A2 saw the label while rating, R3 did not):")
     L.append("   raters:   " + ", ".join(f"{k} {v:.4f}" for k, v in res["spearman_with_label"].items()))
     L.append("   lexicons: " + ", ".join(f"{k} {v:.4f}" for k, v in res["spearman_lexicon_with_label"].items()))
     L.append("")
 
-    # 1b. teljes minta, mindket aranystandarddal (paros bootstrap)
+    # 1b. whole benchmark, both gold standards (paired bootstrap)
     rng0 = np.random.default_rng(args.seed + 2)
     res["overall"] = {}
     L.append("1b. Whole benchmark:")
@@ -166,7 +167,7 @@ def main():
             L.append(f"     {p['a']} minus {p['b']}: {p['delta']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]")
     L.append("")
 
-    # 2. cimken beluli korrelacio
+    # 2. within-label correlation
     groups = [np.where(y)[0], np.where(~y)[0]]
 
     def pooled(v, gold, idx_list):
@@ -199,7 +200,7 @@ def main():
             L.append(f"     {p['a']} minus {p['b']}: {p['delta']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]")
     L.append("")
 
-    # 3. "the"-reszminta
+    # 3. the "the" subset
     def toks(s):
         return [t.strip() for t in str(s).split(",") if t.strip()]
 
@@ -226,13 +227,14 @@ def main():
                 L.append(f"     {p['a']} minus {p['b']}: {p['delta']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]")
     L.append("")
 
-    # 4. az audit soran hozzaadott kuralt szavakat nem tartalmazo mondatok
-    #    (az auditlapon latszott, hany benchmarkmondatban szerepel egy szo)
-    audit_path = os.path.join(base, "lexicon_audit.xlsx")
-    if os.path.exists(audit_path):
+    # 4. sentences without any curated term added during the audit
+    #    (the audit sheet showed in how many benchmark sentences a term occurs)
+    audit_path = next((p for p in (os.path.join(base, "audit_added_terms.txt"), os.path.join(HERE, "audit_added_terms.txt"))
+                       if os.path.exists(p)), None)
+    if audit_path:
         import re as _re
-        au = pd.read_excel(audit_path, sheet_name="audit", keep_default_na=False)
-        new_terms = set(au[au.eredet.astype(str).str.startswith("ÚJ")].word.astype(str).str.strip().str.lower())
+        with open(audit_path, encoding="utf-8-sig") as fh:
+            new_terms = {ln.strip().lower() for ln in fh if ln.strip()}
         added = set(g[g.tier != "auto"].term) & new_terms
         tokre = _re.compile(r"[a-z0-9'*-]+")
         a_single = {t for t in added if " " not in t}
@@ -264,7 +266,7 @@ def main():
                 L.append(f"     {p['a']} minus {p['b']}: {p['delta']:+.4f} [{p['ci95'][0]:+.4f}, {p['ci95'][1]:+.4f}]")
         L.append("")
     else:
-        L.append("4. lexicon_audit.xlsx not found; check without audit additions skipped.")
+        L.append("4. audit_added_terms.txt not found; check without audit additions skipped.")
         L.append("")
     L.append(f"Intervals: 95% percentile bootstrap, {args.boot} resamples (within-label: resampled separately within each label group).")
 
@@ -274,7 +276,7 @@ def main():
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(res, f, ensure_ascii=False, indent=1, default=float)
     print(report)
-    print("\nKiirva:", out_txt)
+    print("\nWritten:", out_txt)
 
 
 if __name__ == "__main__":

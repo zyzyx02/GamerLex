@@ -239,7 +239,10 @@ python build/gamerlex_build.py
 python build/gamerlex_bench_robustness.py
 ```
 
-They need the Steam review corpus, the sentence benchmark and the third rater's ratings, which are not redistributed here because they contain review texts. With these inputs and the same package versions, the run reproduces the release (all random steps use fixed seeds). `build/lexicon_master_v2.csv` is the list of 4,344 audited candidate terms that enters the build.
+They need the Steam review corpus and the sentence benchmark (`bench/bench_merged.csv` with the two annotators' ratings and `bench/bench_rater3.csv` with the third rater's), which are not redistributed here because they contain review texts. With these inputs and the same package versions, the run reproduces the release (all random steps use fixed seeds).
+
+- `build/lexicon_master_v2.csv` is the list of 4,344 audited candidate terms that enters the build (the build uses `word`, `tier` and `slang_type`; `source_seed`, `iter` and `score` record the seed term, the expansion round and the similarity score from the embedding expansion).
+- `build/audit_added_terms.txt` lists the candidates added during the manual audit; `gamerlex_bench_robustness.py` uses it for the check on sentences without such terms.
 
 ## Citation
 

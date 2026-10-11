@@ -1,70 +1,70 @@
 # -*- coding: utf-8 -*-
 """
-GamerLex :: valencia kiosztasa, kiadasi csomag es szamszeru kiertekeles
-======================================================================
+GamerLex :: valence estimation, release package and evaluation
+==============================================================
 
-MIT CSINAL (egy futassal):
-    1. A korpuszt veletlenszeruen harom reszre osztja (seed 42):
-       70% tanito, 10% validacios, 20% teszt. A benchmark mondatait
-       tartalmazo review-k egyik reszbe sem kerulnek be.
-    2. A tanito reszen minden lexikonszora kiszamolja, mennyire kotodik az
-       ajanlo (voted_up) review-khoz, a review hosszara korrigalva
-       (hossz-savonkent retegzett Mantel-Haenszel log-eselyhanyados).
-    3. Szures, csak a tanito resz alapjan:
-         - a tokenizaloval nem illesztheto bejegyzes kiesik;
-         - ami kevesebb mint 5 tanito review-ban fordul elo, kiesik;
-         - a VADER-felulirasi reteg szava kiesik (marad a VADER-nel), ha a
-           korpusz szerint is egyertelmuen negativ.
-    4. A log-eselyhanyadost a VADER skalajara (-4..+4) illeszti olyan
-       horgonyszavakon, amelyek a VADER-ben benne vannak, a GamerLexben
-       nincsenek. Ket illesztest probal ki (egy meredekseg / elojelenkent
-       kulon meredekseg), es a validacios reszen a jobbat valasztja.
-    5. A teszt reszen osszeveti: VADER, VADER + GamerLex retegenkent, a
-       GamerLex onmagaban, az automatikus reteg kulon, es ket kuralatlan alapvonal
-       (a 30 000 leggyakoribb token automatikus valenciaval). Mutatok: ROC AUC, review-hossz szerint
-       retegzett AUC, kiegyensulyozott pontossag, lefedettseg; a VADER-hez
-       mert kulonbsegre bootstrap konfidenciaintervallum.
-       A benchmark mondatokon Spearman-korrelaciot szamol az emberi
-       ertekelessel. Ha a bench/gamerlex_bench_GT_vak.xlsx ki van toltve,
-       a harom ertekelo medianjaval is.
-    6. Automatikus reteg ('auto'): a leggyakoribb tokenek kozul azok a tartalmas
-       szavak, amelyek sem a VADER-ben, sem a kuralt GamerLexben nincsenek, es
-       erosen kotodnek az ajanlashoz (elore rogzitett kuszobok). Funkcioszavak,
-       szamjegyes vagy irasjeles tokenek es tulajdonnevek nem kerulnek bele.
-    7. Mufajonkenti osszevetes (ha a korpuszban vannak genre_* oszlopok).
-    8. Kiirja a kiadasi csomagot.
+WHAT IT DOES (in one run):
+    1. Splits the corpus at random into three parts (seed 42): 70% training,
+       10% validation, 20% test. Reviews that contain a benchmark sentence are
+       left out of all three.
+    2. On the training part, computes for every lexicon entry how strongly it
+       is associated with recommending (voted_up) reviews, corrected for review
+       length (Mantel-Haenszel log odds ratio stratified by length band).
+    3. Filters, using the training part only:
+         - entries the reference tokenizer cannot match are dropped;
+         - entries found in fewer than 5 training reviews are dropped;
+         - a vader_override candidate is dropped (the VADER value is kept) if
+           the corpus also shows a clearly negative association.
+    4. Maps the log odds ratio to the VADER range (-4..+4) with anchor words
+       that are in VADER but not in GamerLex. Two mappings are tried (one slope,
+       or a separate slope for each sign); the validation part picks the better.
+    5. Compares on the test part: VADER, VADER + GamerLex tier by tier,
+       GamerLex alone, the automatic tier alone, and two uncurated baselines
+       (the 30,000 most frequent tokens with automatic valence). Metrics: ROC
+       AUC, length-stratified AUC, balanced accuracy, coverage; differences from
+       VADER with bootstrap confidence intervals.
+       On the benchmark sentences, computes the Spearman correlation with the
+       human ratings: the mean of the two annotators and, if the third rater's
+       file is present, the median of the three raters.
+    6. Automatic tier ('auto'): content words among the most frequent tokens
+       that are in neither VADER nor the curated GamerLex tiers and are strongly
+       associated with the recommendation (fixed thresholds). Function words,
+       tokens with digits or punctuation, and proper names are excluded.
+    7. Comparison by genre (if the corpus has genre_* columns).
+    8. Writes the release package.
 
-MIT OLVAS:
+INPUTS:
     steam_sppm_clustered_deduped.parquet   (review_df.reviews.review, review_df.reviews.voted_up)
-    lexicon_master_v2.csv                  (a gamerslang_lexicon_apply_audit.py kimenete)
-    bench/bench_merged.csv                 (nem kotelezo; a mondatszintu kiertekeleshez)
-    bench/gamerlex_bench_GT_vak.xlsx       (nem kotelezo; a harmadik ertekelo pontszamai)
-    Mindet maga keresi meg (aktualis mappa, a szkript mappaja, output/gamerslang,
-    H:/output/gamerslang, a korpuszt a H:/ gyokerben is). Ha valamit nem talal,
-    kiirja, hol kereste.
+    lexicon_master_v2.csv                  (the audited candidate list)
+    bench/bench_merged.csv                 (optional; sentence-level evaluation)
+    bench/bench_rater3.csv                 (optional; third rater: sentence_id, rating)
+    All are searched for in the script folder, output/gamerslang under the
+    working directory and the working directory itself; the corpus also two
+    levels above the script. If something is missing, the script prints
+    where it looked.
 
-MIT IR (a lexikon mappajanak 'release' almappajaba):
-    GamerLex_v1.0.csv           a lexikon: term, valence, tier, category, statisztikak
-    GamerLex_v1.0_vader.txt     VADER-formatum, minden reteg (tobbszavas kifejezes alahuzassal)
-    GamerLex_v1.0_curated_vader.txt   ugyanez az automatikus reteg nelkul
-    GamerLex_v1.0.json          ugyanez JSON-ban
-    GamerLex_v1.0_dropped.csv   a szuresen kiesett bejegyzesek az okkal
-    GamerLex_v1.0_anchors.csv   a skalaillesztes horgonyszavai
-    GamerLex_v1.0_results.json  minden szamszeru eredmeny gepileg olvashatoan
-    GamerLex_v1.0_report.txt    ugyanez olvashato formaban
-    gamerlex.py                 segedmodul a hasznalathoz (VADER-rel)
-    README.md, CITATION.cff     a kozzetetelhez
-  es a lexikon mappajanak 'eval' almappajaba (review-szoveget tartalmaz, NEM kozzetetelre):
-    GamerLex_eval_test_sample.csv   a tesztminta a valtozatok pontszamaival
-    GamerLex_induced_baseline.csv   a kuralatlan alapvonal szavai
+OUTPUTS (in the 'release' subfolder next to the lexicon file):
+    GamerLex_v1.0.csv           the lexicon: term, valence, tier, category, statistics
+    GamerLex_v1.0_vader.txt     VADER format, all tiers (multi-word terms joined with underscores)
+    GamerLex_v1.0_curated_vader.txt   the same without the automatic tier
+    GamerLex_v1.0.json          the same as JSON
+    GamerLex_v1.0_dropped.csv   entries removed by the filters, with the reason
+    GamerLex_v1.0_anchors.csv   anchor words of the scale mapping
+    GamerLex_v1.0_results.json  every number, machine readable
+    GamerLex_v1.0_report.txt    the same in readable form
+    gamerlex.py                 helper module for use with VADER
+    README.md, CITATION.cff     for publication
+  and in the 'eval' subfolder (contains review texts, NOT for publication):
+    GamerLex_eval_test_sample.csv   the test sample with the score of every variant
+    GamerLex_induced_baseline.csv   tokens of the uncurated baseline
 
-HOGYAN FUTTASD (a H:/ gyokerbol):
-    python output\\gamerslang\\gamerlex_build.py
-    python output\\gamerslang\\gamerlex_build.py --force           (meglevo kiadas felulirasa)
-    python output\\gamerslang\\gamerlex_build.py --test-n 300000   (nagyobb tesztminta, lassabb)
+HOW TO RUN:
+    python gamerlex_build.py
+    python gamerlex_build.py --force           (overwrite an existing release)
+    python gamerlex_build.py --test-n 300000   (larger test sample, slower)
 
-Fuggosegek: pandas, numpy, pyarrow, vaderSentiment.
-Varhato futasido: nagyjabol 20-25 perc.
+Requirements: pandas, numpy, pyarrow, vaderSentiment.
+Run time: roughly 20-25 minutes.
 """
 
 import argparse
@@ -88,24 +88,24 @@ VOTE_COL = "review_df.reviews.voted_up"
 TOK = re.compile(r"[a-z0-9'*-]+")
 SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
 LEN_EDGES = [5, 10, 20, 40, 80, 160, 320]
-P_TRAIN, P_VAL = 0.70, 0.10                 # a maradek 20% a teszt
+P_TRAIN, P_VAL = 0.70, 0.10                 # the remaining 20% is the test part
 MIN_TRAIN_N = 5
-OVR_DIFF, OVR_Z = -0.10, -3.0               # felulirasi reteg: ennel negativabb szo marad a VADER-nel
+OVR_DIFF, OVR_Z = -0.10, -3.0               # override tier: a word more negative than this keeps its VADER value
 ANCHOR_MIN_N = 500
 SHRINK_N0 = 25.0
-IND_K = 30_000                              # kuralatlan alapvonal: ennyi leggyakoribb token
-IND_SAMPLE = 300_000                        # ennyi review-bol becsuli a gyakorisagot (cimke nelkul)
-IND_Z = 3.0                                 # csak a szignifikansan kotodo tokenek kapnak valenciat
-# automatikus reteg ('auto'): elore rogzitett szabalyok, nem a tesztadaton hangolva
-AUTO_MIN_N = 100                            # legalabb ennyi tanito review
-AUTO_MIN_Z = 5.0                            # legalabb ekkora |z|
-AUTO_MIN_VAL = 0.5                          # legalabb ekkora |valencia|
-CAP_MIN_N = 20                              # tulajdonnev-szures: legalabb ennyi mondatkozi elofordulas
-CAP_RATIO = 0.5                             # ... es ezek legalabb ekkora resze nagy kezdobetus
-WORD_FORM = re.compile(r"[a-z]+(?:-[a-z]+)*")  # az automatikus retegbe csak betukbol allo (esetleg kotojeles) szo kerulhet
+IND_K = 30_000                              # uncurated baseline: this many most frequent tokens
+IND_SAMPLE = 300_000                        # frequency is estimated from this many reviews (no labels)
+IND_Z = 3.0                                 # only clearly associated tokens receive a valence
+# automatic tier ('auto'): fixed rules, not tuned on the test data
+AUTO_MIN_N = 100                            # at least this many training reviews
+AUTO_MIN_Z = 5.0                            # at least this |z|
+AUTO_MIN_VAL = 0.5                          # at least this |valence|
+CAP_MIN_N = 20                              # proper-name filter: at least this many mid-sentence occurrences
+CAP_RATIO = 0.5                             # ... of which at least this share is capitalised
+WORD_FORM = re.compile(r"[a-z]+(?:-[a-z]+)*")  # the automatic tier only takes words made of letters (hyphens allowed inside)
 SENT_MARKS = ".!?\n:;-*"
 TOKC = re.compile(r"[A-Za-z0-9'*-]+")
-# funkcioszavak (a scikit-learn angol stoplistaja; a VADER tagado- es fokozoszavai futas kozben adodnak hozza)
+# function words (scikit-learn English stop list; VADER negations and boosters are added at run time)
 STOPWORDS = set("""
 a about above across after afterwards again against all almost alone along already also although always am
 among amongst amoungst amount an and another any anyhow anyone anything anyway anywhere are around as at back
@@ -129,7 +129,7 @@ with within without would yet you your yours yourself yourselves
 VAL_CLIP = 4.0
 
 
-# ---------------------------------------------------------------- segedfuggvenyek
+# ---------------------------------------------------------------- helpers
 
 def find_file(name, cands, what, required=True):
     for c in cands:
@@ -137,7 +137,7 @@ def find_file(name, cands, what, required=True):
         if os.path.exists(p):
             return p
     if required:
-        print(f"[HIBA] Nem talalom: {name} ({what}). Itt kerestem:")
+        print(f"[ERROR] Cannot find: {name} ({what}). Looked in:")
         for c in cands:
             print("   ", os.path.abspath(os.path.join(c, name)))
         sys.exit(1)
@@ -149,9 +149,9 @@ def pick_col(cols, wanted, suffix):
         return wanted
     hits = [c for c in cols if c.endswith(suffix)]
     if len(hits) == 1:
-        print(f"  [megjegyzes] '{wanted}' helyett ezt az oszlopot hasznalom: {hits[0]}")
+        print(f"  [note] using column {hits[0]} instead of '{wanted}'")
         return hits[0]
-    print(f"[HIBA] Nincs '{wanted}' oszlop a parquet fajlban. A fajl oszlopai:")
+    print(f"[ERROR] No column '{wanted}' in the parquet file. Its columns are:")
     for c in cols:
         print("   ", c)
     sys.exit(1)
@@ -175,7 +175,7 @@ def auc(scores, y):
 
 
 def strat_auc(scores, y, bins, nb):
-    """Hossz-savonkent szamolt AUC, a savok pozitiv-negativ parjainak szamaval sulyozva."""
+    """AUC computed within length bands, weighted by the number of positive-negative pairs per band."""
     num = den = 0.0
     for b in range(nb):
         m = bins == b
@@ -198,7 +198,7 @@ def spearman(a, b):
 
 
 def kripp_alpha(ratings, metric="interval"):
-    """Krippendorff-alfa; ratings: ertekelok x egysegek (np.nan = hianyzik), coincidence-matrixszal."""
+    """Krippendorff's alpha; ratings: raters x units (np.nan = missing), via the coincidence matrix."""
     r = np.asarray(ratings, dtype=float)
     vals = np.unique(r[~np.isnan(r)])
     if len(vals) < 2:
@@ -219,7 +219,7 @@ def kripp_alpha(ratings, metric="interval"):
     n = nc.sum()
     if metric == "interval":
         dist = (vals[:, None] - vals[None, :]) ** 2
-    else:                                            # ordinalis
+    else:                                            # ordinal
         cum = np.cumsum(nc)
         dist = np.zeros((k, k))
         for a in range(k):
@@ -233,14 +233,14 @@ def kripp_alpha(ratings, metric="interval"):
 
 def balanced_acc(scores, y):
     y = np.asarray(y, dtype=bool)
-    pred = np.asarray(scores) >= 0          # 0 (nincs erzelmi szo) = ajanlo, mert az a tobbsegi osztaly
+    pred = np.asarray(scores) >= 0          # 0 (no sentiment word) counts as recommending, the majority class
     tpr = pred[y].mean() if y.any() else float("nan")
     tnr = (~pred[~y]).mean() if (~y).any() else float("nan")
     return float((tpr + tnr) / 2.0)
 
 
 def build_joiner(multi_terms):
-    """A tobbszavas kifejezeseket alahuzassal egy tokenne fuzi (kis- es nagybetutol fuggetlenul)."""
+    """Joins multi-word terms into one token with underscores (case-insensitive)."""
     if not multi_terms:
         return lambda t: t
     parts = sorted(multi_terms, key=len, reverse=True)
@@ -251,7 +251,7 @@ def build_joiner(multi_terms):
 
 
 def make_analyzer(SIA, entries=None, vader=True):
-    """entries: {token: valence}; vader=False eseten csak a GamerLex szokincse marad."""
+    """entries: {token: valence}; with vader=False only the GamerLex vocabulary is used."""
     a = SIA()
     if not vader:
         a.lexicon = {}
@@ -377,12 +377,12 @@ EXAMPLES = [
 
 
 def usage_section(outdir, base, tok_pattern):
-    """A README 'Usage' resze. A peldakimenetet a kiadott gamerlex.py-vel szamolja ki."""
+    """The Usage section of the README. The example output is computed with the released gamerlex.py."""
     import importlib.util
     spec = importlib.util.spec_from_file_location("gamerlex_release_helper", os.path.join(outdir, "gamerlex.py"))
     mod = importlib.util.module_from_spec(spec)
     _dwb = sys.dont_write_bytecode
-    sys.dont_write_bytecode = True          # ne keruljon __pycache__ a release mappaba
+    sys.dont_write_bytecode = True          # keep __pycache__ out of the release folder
     try:
         spec.loader.exec_module(mod)
     finally:
@@ -460,23 +460,22 @@ When reading `{base}.csv` with pandas, pass `keep_default_na=False`: the lexicon
 """
 
 
-# ---------------------------------------------------------------- fo program
+# ---------------------------------------------------------------- main
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--test-n", type=int, default=100_000, help="tesztminta merete (review)")
-    ap.add_argument("--val-n", type=int, default=50_000, help="validacios minta merete (review)")
+    ap.add_argument("--test-n", type=int, default=100_000, help="test sample size (reviews)")
+    ap.add_argument("--val-n", type=int, default=50_000, help="validation sample size (reviews)")
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--boot", type=int, default=200, help="bootstrap ismetlesek szama az AUC-kulonbseghez")
-    ap.add_argument("--boot-bench", type=int, default=1000, help="bootstrap ismetlesek szama a benchmarkon")
-    ap.add_argument("--force", action="store_true", help="meglevo kiadas felulirasa")
+    ap.add_argument("--boot", type=int, default=200, help="bootstrap resamples for AUC differences")
+    ap.add_argument("--boot-bench", type=int, default=1000, help="bootstrap resamples on the benchmark")
+    ap.add_argument("--force", action="store_true", help="overwrite an existing release")
     args = ap.parse_args()
     t0 = time.time()
 
     here = os.path.dirname(os.path.abspath(__file__))
     cwd = os.getcwd()
-    lexpath = find_file(LEXFILE, [here, os.path.join(cwd, "output", "gamerslang"), cwd, r"H:\output\gamerslang"],
-                        "a megtisztitott lexikon; elobb futtasd: python output\\gamerslang\\gamerslang_lexicon_apply_audit.py")
+    lexpath = find_file(LEXFILE, [here, os.path.join(cwd, "output", "gamerslang"), cwd], "the audited candidate list")
     lexdir = os.path.dirname(lexpath)
     outdir = os.path.join(lexdir, "release")
     base = f"GamerLex_v{VERSION}"
@@ -485,40 +484,40 @@ def main():
     f_eval = os.path.join(evaldir, "GamerLex_eval_test_sample.csv")
     existing = [p for p in (f_main, f_eval) if os.path.exists(p)]
     if existing and not args.force:
-        print("[MEGALLTAM] Mar letezik kiadas, nem irom felul (--force kell):")
+        print("[STOPPED] A release already exists; not overwriting it (use --force):")
         for p in existing:
             print("   ", p)
         sys.exit(1)
-    parquet = find_file(PARQUET, [cwd, os.path.abspath(os.path.join(here, "..", "..")), here, "H:\\"], "korpusz")
+    parquet = find_file(PARQUET, [cwd, os.path.abspath(os.path.join(here, "..", "..")), here], "corpus")
     benchpath = find_file("bench_merged.csv", [os.path.join(lexdir, "bench"), lexdir], "benchmark", required=False)
-    gtpath = find_file("gamerlex_bench_GT_vak.xlsx", [os.path.join(lexdir, "bench"), lexdir], "harmadik ertekelo", required=False)
+    r3path = find_file("bench_rater3.csv", [os.path.join(lexdir, "bench"), lexdir], "third rater", required=False)
 
     try:
         import pyarrow.parquet as pq
     except ImportError:
-        print("[HIBA] Hianyzik a pyarrow csomag. Telepites: pip install pyarrow")
+        print("[ERROR] The pyarrow package is missing. Install it with: pip install pyarrow")
         sys.exit(1)
     try:
         from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer as SIA
     except ImportError:
-        print("[HIBA] Hianyzik a vaderSentiment csomag. Telepites: pip install vaderSentiment")
+        print("[ERROR] The vaderSentiment package is missing. Install it with: pip install vaderSentiment")
         sys.exit(1)
 
-    print("Lexikon:  ", lexpath)
-    print("Korpusz:  ", parquet)
-    print("Benchmark:", benchpath if benchpath else "(nincs meg, a mondatszintu kiertekeles kimarad)")
+    print("Lexicon:  ", lexpath)
+    print("Corpus:   ", parquet)
+    print("Benchmark:", benchpath if benchpath else "(not found, sentence-level evaluation skipped)")
 
     lex = pd.read_csv(lexpath, dtype=str, keep_default_na=False, encoding="utf-8-sig")
     need = {"word", "tier", "slang_type"}
     if not need <= set(lex.columns):
-        print("[HIBA] Hianyzo oszlop(ok) a lexikonfajlban:", ", ".join(sorted(need - set(lex.columns))))
+        print("[ERROR] Missing column(s) in the lexicon file:", ", ".join(sorted(need - set(lex.columns))))
         sys.exit(1)
     lex["word"] = lex.word.str.strip().str.lower()
     lex = lex[lex.word != ""].drop_duplicates("word").reset_index(drop=True)
     n_input = len(lex)
     vader_lex = SIA().lexicon
 
-    # ---- szokincs: GamerLex-bejegyzesek + VADER-horgonyszavak
+    # ---- vocabulary: GamerLex entries + VADER anchor words
     words = list(lex.word)
     single = {}
     multi = defaultdict(list)
@@ -539,9 +538,9 @@ def main():
     V = len(words) + len(anchors)
     vocab = set(single)
     starters = set(multi)
-    print(f"Lexikonbejegyzes: {n_input}  (illesztheto {int(matchable.sum())})  |  VADER-horgonyjelolt: {len(anchors)}")
+    print(f"Lexicon entries: {n_input}  (matchable {int(matchable.sum())})  |  VADER anchor candidates: {len(anchors)}")
 
-    # ---- benchmark mondatok (ezeket tartalmazo review-k kimaradnak)
+    # ---- benchmark sentences (reviews that contain them are left out)
     bench = None
     bench_set = set()
     if benchpath:
@@ -551,10 +550,10 @@ def main():
             bench = bench[~bench.sentence.str.startswith("#NAME")].copy()
             bench_set = {s.strip() for s in bench.sentence}
         else:
-            print("  [megjegyzes] a bench_merged.csv oszlopai nem a vartak, a mondatszintu kiertekeles kimarad")
+            print("  [note] unexpected columns in bench_merged.csv; sentence-level evaluation skipped")
             bench = None
 
-    # ---- egy menet a korpuszon
+    # ---- one pass over the corpus
     pf = pq.ParquetFile(parquet)
     cols = pf.schema_arrow.names
     tcol = pick_col(cols, TEXT_COL, ".review")
@@ -562,15 +561,15 @@ def main():
     total = pf.metadata.num_rows
     p_val = min(1.0, args.val_n / max(total * P_VAL, 1))
     p_test = min(1.0, args.test_n / max(total * (1 - P_TRAIN - P_VAL), 1))
-    print(f"Review a korpuszban: {total:,}")
-    print("A parquet oszlopai:", ", ".join(cols))
+    print(f"Reviews in the corpus: {total:,}")
+    print("Parquet columns:", ", ".join(cols))
 
-    # ---- elo-menet: a leggyakoribb tokenek a kuralatlan alapvonalhoz (cimket nem hasznal)
+    # ---- first pass: most frequent tokens for the uncurated baseline (labels not used)
     rng0 = np.random.default_rng(args.seed + 7)
     p0 = min(1.0, IND_SAMPLE / max(total, 1))
     df_cnt = Counter()
-    mid_tot = Counter()                       # mondat kozbeni elofordulasok (tulajdonnev-szureshez)
-    mid_cap = Counter()                       # ebbol nagy kezdobetus
+    mid_tot = Counter()                       # mid-sentence occurrences (proper-name filter)
+    mid_cap = Counter()                       # of which capitalised
     for batch in pf.iter_batches(batch_size=50_000, columns=[tcol]):
         texts = batch.column(0).to_pylist()
         u0 = rng0.random(len(texts))
@@ -603,15 +602,15 @@ def main():
             n_extra += 1
     V += n_extra
     vocab = set(single)
-    print(f"Kuralatlan alapvonal szokincse: {len(ind_tokens):,} token ({time.time() - t0:.0f} mp)")
+    print(f"Uncurated baseline vocabulary: {len(ind_tokens):,} tokens ({time.time() - t0:.0f} s)")
 
     rng = np.random.default_rng(args.seed)
     NB = len(LEN_EDGES) + 1
-    n2l = [0] * (V * NB)                      # szo x hossz-sav, sima listaban (gyorsabb, mint a numpy elemenkent)
+    n2l = [0] * (V * NB)                      # word x length band, as a flat list (faster than element-wise numpy)
     npos2l = [0] * (V * NB)
     Nb = np.zeros(NB, dtype=np.int64)
     NPOSb = np.zeros(NB, dtype=np.int64)
-    counts = {"train": 0, "val": 0, "test": 0, "bench_kizarva": 0, "ures": 0}
+    counts = {"train": 0, "val": 0, "test": 0, "bench_excluded": 0, "empty": 0}
     pos_counts = {"train": 0, "val": 0, "test": 0}
     val_texts, val_y, test_texts, test_y = [], [], [], []
     gcols = [c for c in cols if c.startswith("genre_")]
@@ -628,10 +627,10 @@ def main():
         for k, (txt, vote) in enumerate(zip(texts, votes)):
             seen += 1
             if seen >= next_report:
-                print(f"  {seen:,} review  ({time.time() - t0:.0f} mp)")
+                print(f"  {seen:,} reviews  ({time.time() - t0:.0f} s)")
                 next_report += 500_000
             if txt is None or vote is None:
-                counts["ures"] += 1
+                counts["empty"] += 1
                 continue
             txt = str(txt)
             try:
@@ -640,10 +639,10 @@ def main():
                 pos = str(vote).strip().lower() in ("true", "1")
             toks = TOK.findall(txt.lower())
             if not toks:
-                counts["ures"] += 1
+                counts["empty"] += 1
                 continue
             if bench_set and any(s.strip() in bench_set for s in SENT_SPLIT.split(txt.strip())):
-                counts["bench_kizarva"] += 1
+                counts["bench_excluded"] += 1
                 continue
             if u[k] >= P_TRAIN:
                 if u[k] < P_TRAIN + P_VAL:
@@ -661,7 +660,7 @@ def main():
                         if gcols:
                             test_genres.append([1 if (g[k] is not None and float(g[k]) > 0) else 0 for g in gmat])
                 continue
-            # tanito resz
+            # training part
             counts["train"] += 1
             pos_counts["train"] += pos
             lt = len(toks)
@@ -685,12 +684,12 @@ def main():
                     npos2l[q] += 1
 
     if counts["train"] == 0:
-        print("[HIBA] A tanito resz ures.")
+        print("[ERROR] The training part is empty.")
         sys.exit(1)
-    print(f"Korpusz-menet kesz ({time.time() - t0:.0f} mp). Tanito: {counts['train']:,}  validacios: {counts['val']:,}  "
-          f"teszt: {counts['test']:,}  benchmark miatt kizarva: {counts['bench_kizarva']:,}  ures: {counts['ures']:,}")
+    print(f"Corpus pass done ({time.time() - t0:.0f} s). Training: {counts['train']:,}  validation: {counts['val']:,}  "
+          f"test: {counts['test']:,}  excluded (benchmark): {counts['bench_excluded']:,}  empty: {counts['empty']:,}")
 
-    # ---- statisztikak a tanito reszen
+    # ---- statistics on the training part
     n2 = np.array(n2l, dtype=np.int64).reshape(V, NB)
     npos2 = np.array(npos2l, dtype=np.int64).reshape(V, NB)
     n = n2.sum(axis=1)
@@ -723,7 +722,7 @@ def main():
     lex["vader_valence"] = [vader_lex.get(w, np.nan) for w in words]
     lex["multiword"] = lex.word.str.contains(" ").astype(int)
 
-    # ---- szures (csak tanito adatokbol)
+    # ---- filters (training data only)
     reason = pd.Series("", index=lex.index)
     reason[~lex.matchable] = "not matchable by the reference tokenizer"
     reason[(reason == "") & (lex.n_train < MIN_TRAIN_N)] = f"fewer than {MIN_TRAIN_N} training reviews"
@@ -732,9 +731,9 @@ def main():
     dropped = lex[reason != ""].copy()
     dropped["ok"] = reason[reason != ""]
     keep = lex[reason == ""].copy().reset_index(drop=True)
-    print(f"Szures utan megmarad: {len(keep)}  |  kiesett: {len(dropped)}  {dropped.ok.value_counts().to_dict()}")
+    print(f"Kept after filtering: {len(keep)}  |  dropped: {len(dropped)}  {dropped.ok.value_counts().to_dict()}")
 
-    # ---- skalaillesztes a VADER-re horgonyszavakon
+    # ---- mapping to the VADER scale on anchor words
     a_idx = np.array([single[w] for w in anchors if single.get(w, -1) >= G], dtype=int)
     anc = pd.DataFrame({"word": [w for w in anchors if single.get(w, -1) >= G]})
     anc["vader_valence"] = [vader_lex[w] for w in anc.word]
@@ -743,7 +742,7 @@ def main():
     anc["assoc"] = assoc[a_idx]
     anc = anc[(anc.n_train >= ANCHOR_MIN_N) & anc.log_odds.notna()].reset_index(drop=True)
     if len(anc) < 50:
-        print(f"[HIBA] Tul keves horgonyszo ({len(anc)}), a skalaillesztes nem megbizhato.")
+        print(f"[ERROR] Too few anchor words ({len(anc)}); the scale mapping would not be reliable.")
         sys.exit(1)
     x = anc.log_odds.values
     y = anc.vader_valence.values
@@ -758,9 +757,9 @@ def main():
         "sign_agreement": float((np.sign(x) == np.sign(y)).mean()),
         "k_single": k_single, "k_pos": k_pos, "k_neg": k_neg,
     }
-    print(f"Horgonyszo: {len(anc)}  |  Pearson {cal_stats['pearson']:.3f}  Spearman {cal_stats['spearman']:.3f}  "
-          f"elojel-egyezes {cal_stats['sign_agreement']:.3f}")
-    print(f"Meredekseg: egy = {k_single:.3f}  |  pozitiv oldal = {k_pos:.3f}  negativ oldal = {k_neg:.3f}")
+    print(f"Anchor words: {len(anc)}  |  Pearson {cal_stats['pearson']:.3f}  Spearman {cal_stats['spearman']:.3f}  "
+          f"sign agreement {cal_stats['sign_agreement']:.3f}")
+    print(f"Slope: single = {k_single:.3f}  |  positive side = {k_pos:.3f}  negative side = {k_neg:.3f}")
 
     def valence_for(kp, kn):
         lo = keep.log_odds.values
@@ -772,7 +771,7 @@ def main():
     if math.isfinite(k_pos) and math.isfinite(k_neg) and k_pos > 0 and k_neg > 0:
         cals["piecewise"] = (k_pos, k_neg)
     if k_single <= 0:
-        print("[HIBA] A skalaillesztes meredeksege nem pozitiv; a korpuszbol mert irany nem egyezik a VADER-rel.")
+        print("[ERROR] The slope of the scale mapping is not positive; the corpus direction does not match VADER.")
         sys.exit(1)
 
     multi_terms = [w for w in keep.word if " " in w]
@@ -785,21 +784,21 @@ def main():
                 d[w.replace(" ", "_")] = float(v)
         return d
 
-    # ---- az illesztes kivalasztasa a validacios reszen
+    # ---- choosing the mapping on the validation part
     val_y_arr = np.array(val_y, dtype=bool)
     val_joined = [joiner(t) for t in val_texts]
-    print(f"Validacios minta: {len(val_texts):,} review. Illesztes kivalasztasa...")
+    print(f"Validation sample: {len(val_texts):,} reviews. Choosing the mapping...")
     val_res = {}
     for name, (kp, kn) in cals.items():
         an = make_analyzer(SIA, entries_for(valence_for(kp, kn)))
         val_res[name] = auc(score_texts(an, val_joined), val_y_arr)
-        print(f"    {name:10s} AUC (VADER + GamerLex, validacios): {val_res[name]:.4f}")
+        print(f"    {name:10s} AUC (VADER + GamerLex, validation): {val_res[name]:.4f}")
     best = max(val_res, key=lambda q: val_res[q])
     kp, kn = cals[best]
     keep["valence"] = np.round(valence_for(kp, kn), 2)
-    print(f"Valasztott illesztes: {best}  (k+ = {kp:.3f}, k- = {kn:.3f})")
+    print(f"Chosen mapping: {best}  (k+ = {kp:.3f}, k- = {kn:.3f})")
 
-    # ---- kuralatlan alapvonal: a leggyakoribb tokenek ugyanigy szamolt valenciaval
+    # ---- uncurated baseline: the most frequent tokens with valence computed the same way
     ind_idx = np.array([single[w] for w in ind_tokens], dtype=int)
     ind = pd.DataFrame({"word": ind_tokens, "n_train": n[ind_idx], "log_odds": lor[ind_idx], "z": z[ind_idx], "assoc": assoc[ind_idx],
                         "rec_share": rec[ind_idx], "expected_rec_share": exp[ind_idx]})
@@ -811,10 +810,10 @@ def main():
     ind["in_gamerlex"] = ind.word.isin(set(keep.word)).astype(int)
     ind_all = dict(zip(ind.word, ind.valence.astype(float)))
     ind_new = {w: v for w, v in ind_all.items() if w not in vader_lex}
-    print(f"Kuralatlan alapvonal: {len(ind_all):,} token kap valenciat (|z| >= {IND_Z:g}); ebbol a VADER-ben nincs: {len(ind_new):,}; "
-          f"a GamerLexben is szerepel: {int(ind.in_gamerlex.sum()):,}")
+    print(f"Uncurated baseline: {len(ind_all):,} tokens receive a valence (|z| >= {IND_Z:g}); not in VADER: {len(ind_new):,}; "
+          f"also in GamerLex: {int(ind.in_gamerlex.sum()):,}")
 
-    # ---- automatikus reteg: tartalmas szavak elore rogzitett szabalyokkal
+    # ---- automatic tier: content words selected by fixed rules
     try:
         import vaderSentiment.vaderSentiment as _vs
         func_words = set(STOPWORDS) | set(getattr(_vs, "NEGATE", [])) | set(getattr(_vs, "BOOSTER_DICT", {}))
@@ -848,13 +847,13 @@ def main():
                               "multiword": 0, "valence": auto.valence.values})
     keep = pd.concat([keep, auto_rows], ignore_index=True)
     class_counts = {k: int(v) for k, v in ind.token_class.value_counts().items()}
-    print(f"Automatikus reteg: {len(auto_rows):,} szo (tartalmas, betukbol all, nincs a VADER-ben es a kuralt retegekben, n >= {AUTO_MIN_N}, "
-          f"|z| >= {AUTO_MIN_Z:g}, |valencia| >= {AUTO_MIN_VAL}).  Tokenosztalyok az alapvonalban: {class_counts}")
+    print(f"Automatic tier: {len(auto_rows):,} words (content words made of letters, not in VADER or the curated tiers, n >= {AUTO_MIN_N}, "
+          f"|z| >= {AUTO_MIN_Z:g}, |valence| >= {AUTO_MIN_VAL}).  Token classes in the baseline: {class_counts}")
 
-    # ---- kiertekeles a teszt reszen
+    # ---- evaluation on the test part
     test_y_arr = np.array(test_y, dtype=bool)
     test_joined = [joiner(t) for t in test_texts]
-    print(f"Tesztminta: {len(test_texts):,} review. Kiertekeles (ez a leglassabb resz)...")
+    print(f"Test sample: {len(test_texts):,} reviews. Evaluating (the slowest step)...")
     cur_words = list(keep.word[keep.tier != "auto"])
     keepset_single = {w for w in cur_words if " " not in w}
     autoset = set(keep.word[keep.tier == "auto"])
@@ -881,12 +880,12 @@ def main():
     info = [tok_info(t) for t in test_texts]
     test_len = np.array([i[0] for i in info], dtype=int)
     test_bin = np.array([i[1] for i in info], dtype=int)
-    has = np.array([i[2] for i in info], dtype=bool)          # van benne kuralt GamerLex-szo
-    has_any = np.array([i[3] for i in info], dtype=bool)      # van benne barmelyik reteg szava
+    has = np.array([i[2] for i in info], dtype=bool)          # contains a curated GamerLex term
+    has_any = np.array([i[3] for i in info], dtype=bool)      # contains a term of any tier
     vals = keep.valence.values
     CURATED = ("core", "extended", "vader_override")
     ALL_TIERS = CURATED + ("auto",)
-    # (nev, bejegyzesek, VADER szokincse is, tobbszavas kifejezesek osszefuzese)
+    # (name, entries, include VADER vocabulary, join multi-word terms)
     variants = [
         ("VADER", None, True, False),
         ("VADER + core", entries_for(vals, ("core",)), True, True),
@@ -917,14 +916,14 @@ def main():
             "coverage": float((sc != 0).mean()),
         }
         test_rows.append(row)
-        print(f"    {name:38s} AUC {row['auc']:.4f} | retegzett AUC {row['auc_length_stratified']:.4f} | AUC (van kuralt szo) {row['auc_with_term']:.4f} | "
-              f"kiegy. pontossag {row['balanced_accuracy']:.4f} | lefedettseg {row['coverage']:.4f}  ({time.time() - ts:.0f} mp)")
+        print(f"    {name:38s} AUC {row['auc']:.4f} | stratified AUC {row['auc_length_stratified']:.4f} | AUC (with curated term) {row['auc_with_term']:.4f} | "
+              f"balanced acc. {row['balanced_accuracy']:.4f} | coverage {row['coverage']:.4f}  ({time.time() - ts:.0f} s)")
 
-    # bootstrap: kulonbseg a VADER-hez kepest, minden valtozatra
+    # bootstrap: difference from VADER for every variant
     brng = np.random.default_rng(args.seed + 1)
     m = len(test_y_arr)
     others = [v[0] for v in variants if v[0] != "VADER"]
-    b_auc = {v[0]: [] for v in variants}           # minden ujramintavetelezesben minden valtozat erteke
+    b_auc = {v[0]: [] for v in variants}           # value of every variant in every resample
     b_str = {v[0]: [] for v in variants}
     for _ in range(max(args.boot, 0)):
         ii = brng.integers(0, m, m)
@@ -944,14 +943,14 @@ def main():
         row["delta_auc_strat"] = row["auc_length_stratified"] - base_row["auc_length_stratified"]
         row["delta_auc_ci95"] = [float(np.percentile(d_boot[nm], 2.5)), float(np.percentile(d_boot[nm], 97.5))] if d_boot[nm] else [float("nan")] * 2
         row["delta_auc_strat_ci95"] = [float(np.percentile(ds_boot[nm], 2.5)), float(np.percentile(ds_boot[nm], 97.5))] if ds_boot[nm] else [float("nan")] * 2
-        print(f"    kulonbseg a VADER-hez: {nm:38s} AUC {row['delta_auc']:+.4f} [{row['delta_auc_ci95'][0]:+.4f}, {row['delta_auc_ci95'][1]:+.4f}] | "
-              f"retegzett {row['delta_auc_strat']:+.4f} [{row['delta_auc_strat_ci95'][0]:+.4f}, {row['delta_auc_strat_ci95'][1]:+.4f}]")
+        print(f"    difference from VADER: {nm:38s} AUC {row['delta_auc']:+.4f} [{row['delta_auc_ci95'][0]:+.4f}, {row['delta_auc_ci95'][1]:+.4f}] | "
+              f"stratified {row['delta_auc_strat']:+.4f} [{row['delta_auc_strat_ci95'][0]:+.4f}, {row['delta_auc_strat_ci95'][1]:+.4f}]")
     full_row = [r for r in test_rows if r["variant"] == full_name][0]
     cur_row = [r for r in test_rows if r["variant"] == cur_name][0]
     d_auc = full_row["delta_auc"]
     ci = full_row["delta_auc_ci95"]
 
-    # paros osszevetesek a GamerLex es az alapvonalak kozott (ugyanazokon az ujramintavetelezeseken)
+    # paired comparisons between GamerLex and the baselines (on the same resamples)
     PAIRS = [(full_name, "VADER + induced (new words)"), (full_name, "VADER + induced (all frequent words)"),
              (full_name, cur_name), (full_name, "VADER + auto tier"),
              (cur_name, "VADER + induced (new words)"), (cur_name, "VADER + induced (all frequent words)")]
@@ -969,10 +968,10 @@ def main():
               "delta_auc_strat": rowd[a]["auc_length_stratified"] - rowd[b]["auc_length_stratified"],
               "delta_auc_strat_ci95": ci95(b_str[a] - b_str[b]) if args.boot else [float("nan")] * 2}
         pair_rows.append(pr)
-        print(f"    paros: {a} - {b}: AUC {pr['delta_auc']:+.4f} [{pr['delta_auc_ci95'][0]:+.4f}, {pr['delta_auc_ci95'][1]:+.4f}] | "
-              f"retegzett {pr['delta_auc_strat']:+.4f} [{pr['delta_auc_strat_ci95'][0]:+.4f}, {pr['delta_auc_strat_ci95'][1]:+.4f}]")
+        print(f"    paired: {a} - {b}: AUC {pr['delta_auc']:+.4f} [{pr['delta_auc_ci95'][0]:+.4f}, {pr['delta_auc_ci95'][1]:+.4f}] | "
+              f"stratified {pr['delta_auc_strat']:+.4f} [{pr['delta_auc_strat_ci95'][0]:+.4f}, {pr['delta_auc_strat_ci95'][1]:+.4f}]")
 
-    # ---- mufajonkent: ajanlasi arany, atlagos pontszam es AUC a VADER-rel, illetve a teljes GamerLexszel
+    # ---- by genre: recommending share, mean score and AUC with VADER and with full GamerLex
     genre_rows = []
     genre_corr = {}
     genre_note = ""
@@ -996,20 +995,20 @@ def main():
             genre_corr = {"n_genres": len(genre_rows),
                           "spearman_recshare_vs_mean_vader": spearman([r["mean_vader"] for r in genre_rows], rs),
                           "spearman_recshare_vs_mean_gamerlex": spearman([r["mean_gamerlex"] for r in genre_rows], rs)}
-        print("Mufajonkent (tesztminta):")
+        print("By genre (test sample):")
         for r in genre_rows:
-            print(f"    {r['genre']:14s} n={r['n']:6d}  ajanlo {r['rec_share']:.3f} | atlag VADER {r['mean_vader']:+.3f}  GamerLex {r['mean_gamerlex']:+.3f} | "
-                  f"AUC VADER {r['auc_vader']:.4f}  GamerLex {r['auc_gamerlex']:.4f} | retegzett {r['auc_strat_vader']:.4f} -> kuralt {r['auc_strat_curated']:.4f} -> teljes {r['auc_strat_gamerlex']:.4f}")
+            print(f"    {r['genre']:14s} n={r['n']:6d}  rec. {r['rec_share']:.3f} | mean VADER {r['mean_vader']:+.3f}  GamerLex {r['mean_gamerlex']:+.3f} | "
+                  f"AUC VADER {r['auc_vader']:.4f}  GamerLex {r['auc_gamerlex']:.4f} | stratified {r['auc_strat_vader']:.4f} -> curated {r['auc_strat_curated']:.4f} -> full {r['auc_strat_gamerlex']:.4f}")
         if genre_corr:
-            print(f"    Mufajok ajanlasi aranya es atlagos pontszama kozti Spearman: VADER {genre_corr['spearman_recshare_vs_mean_vader']:+.3f}, "
-                  f"GamerLex {genre_corr['spearman_recshare_vs_mean_gamerlex']:+.3f}  ({genre_corr['n_genres']} mufaj)")
+            print(f"    Spearman between recommending share and mean score across genres: VADER {genre_corr['spearman_recshare_vs_mean_vader']:+.3f}, "
+                  f"GamerLex {genre_corr['spearman_recshare_vs_mean_gamerlex']:+.3f}  ({genre_corr['n_genres']} genres)")
 
-    # ---- mondatszintu benchmark: ket annotator atlaga, es ha megvan, a harom ertekelo medianja
+    # ---- sentence-level benchmark: mean of the two annotators and, if available, median of the three raters
     bench_rows = []
     bench_sets = []
     bench_pairs = []
     agreement = {}
-    gt_status = "not available"
+    r3_status = "not available"
     if bench is not None:
         b2 = bench[bench.A1_sent.notna() & bench.A2_sent.notna()].copy()
         if len(b2) >= 30:
@@ -1018,18 +1017,18 @@ def main():
                          "alpha_ordinal_two": kripp_alpha(R2, "ordinal")}
         if len(b2) >= 30:
             bench_sets.append(("mean of two annotators", b2, ((b2.A1_sent.astype(float) + b2.A2_sent.astype(float)) / 2.0).values))
-        if gtpath:
+        if r3path:
             try:
-                gt = pd.read_excel(gtpath, sheet_name="ertekeles")
-                gt["GT"] = pd.to_numeric(gt["GT_sentiment"], errors="coerce")
-                gt = gt[gt.GT.isin([-2, -1, 0, 1, 2])][["sentence_id", "GT"]].drop_duplicates("sentence_id")
-                n_filled = len(gt)
+                r3 = pd.read_csv(r3path, encoding="utf-8-sig")
+                r3["R3"] = pd.to_numeric(r3["rating"], errors="coerce")
+                r3 = r3[r3.R3.isin([-2, -1, 0, 1, 2])][["sentence_id", "R3"]].drop_duplicates("sentence_id")
+                n_filled = len(r3)
                 if n_filled >= 0.9 * len(bench):
-                    b3 = b2.merge(gt, on="sentence_id", how="inner")
-                    R3 = np.vstack([b3.A1_sent.astype(float).values, b3.A2_sent.astype(float).values, b3.GT.astype(float).values])
+                    b3 = b2.merge(r3, on="sentence_id", how="inner")
+                    R3 = np.vstack([b3.A1_sent.astype(float).values, b3.A2_sent.astype(float).values, b3.R3.astype(float).values])
                     med = np.median(R3, axis=0)
                     bench_sets.append(("median of three raters", b3, med))
-                    names3 = ["A1", "A2", "GT"]
+                    names3 = ["A1", "A2", "R3"]
                     agreement["n_sentences"] = int(R3.shape[1])
                     agreement["pairs"] = []
                     for i in range(3):
@@ -1040,17 +1039,17 @@ def main():
                     agreement["leave_one_out_spearman"] = {names3[i]: spearman(R3[i], R3[[q for q in range(3) if q != i]].mean(axis=0)) for i in range(3)}
                     agreement["alpha_interval_three"] = kripp_alpha(R3, "interval")
                     agreement["alpha_ordinal_three"] = kripp_alpha(R3, "ordinal")
-                    gt_status = f"used ({n_filled} sentences rated)"
+                    r3_status = f"used ({n_filled} sentences rated)"
                 else:
-                    gt_status = f"incomplete ({n_filled} of {len(bench)} sentences rated), not used"
-            except Exception as e:                      # hibas vagy nyitva levo fajl ne allitsa meg a futast
-                gt_status = f"could not be read ({type(e).__name__})"
-        print("Harmadik ertekelo (GT):", gt_status)
+                    r3_status = f"incomplete ({n_filled} of {len(bench)} sentences rated), not used"
+            except Exception as e:                      # a broken or locked file must not stop the run
+                r3_status = f"could not be read ({type(e).__name__})"
+        print("Third rater (R3):", r3_status)
         if agreement:
-            print(f"Ertekelok egyezese: A1-A2 Spearman {agreement['spearman_A1_A2']:.4f}, Krippendorff-alfa (intervallum) ket ertekelo {agreement['alpha_interval_two']:.4f}"
-                  + (f", harom ertekelo {agreement['alpha_interval_three']:.4f}" if "alpha_interval_three" in agreement else ""))
+            print(f"Rater agreement: A1-A2 Spearman {agreement['spearman_A1_A2']:.4f}, Krippendorff's alpha (interval) two raters {agreement['alpha_interval_two']:.4f}"
+                  + (f", three raters {agreement['alpha_interval_three']:.4f}" if "alpha_interval_three" in agreement else ""))
             for pr in agreement.get("pairs", []):
-                print(f"    {pr['raters']}: Spearman {pr['spearman']:.4f}, pontos egyezes {pr['exact']:.3f}, legfeljebb 1 elteres {pr['within_one']:.3f}")
+                print(f"    {pr['raters']}: Spearman {pr['spearman']:.4f}, exact {pr['exact']:.3f}, within one point {pr['within_one']:.3f}")
     for gold_name, bdf, human in bench_sets:
         sents = bdf.sentence.tolist()
         sents_j = [joiner(x) for x in sents]
@@ -1068,7 +1067,7 @@ def main():
         sb = {k: np.array(v) for k, v in sb.items()}
         dboot = {nm: list(sb[nm] - sb["VADER"]) for nm in bs if nm != "VADER"}
         nonneutral = human != 0
-        print(f"Benchmark ({nb_s} mondat), Spearman: {gold_name}")
+        print(f"Benchmark ({nb_s} sentences), Spearman: {gold_name}")
         rho0 = spearman(bs["VADER"], human)
         for name in bs:
             rho = spearman(bs[name], human)
@@ -1079,17 +1078,17 @@ def main():
                 dd = [x for x in dboot[name] if x == x]
                 r["delta"] = rho - rho0
                 r["delta_ci95"] = [float(np.percentile(dd, 2.5)), float(np.percentile(dd, 97.5))] if dd else [float("nan")] * 2
-                print(f"    {name:38s} {rho:.4f}  kulonbseg {r['delta']:+.4f} [{r['delta_ci95'][0]:+.4f}, {r['delta_ci95'][1]:+.4f}]  (lefedettseg {r['coverage']:.4f})")
+                print(f"    {name:38s} {rho:.4f}  difference {r['delta']:+.4f} [{r['delta_ci95'][0]:+.4f}, {r['delta_ci95'][1]:+.4f}]  (coverage {r['coverage']:.4f})")
             else:
-                print(f"    {name:38s} {rho:.4f}  (lefedettseg {r['coverage']:.4f})")
+                print(f"    {name:38s} {rho:.4f}  (coverage {r['coverage']:.4f})")
             bench_rows.append(r)
         for a, b in PAIRS:
             pr = {"gold": gold_name, "a": a, "b": b, "delta": spearman(bs[a], human) - spearman(bs[b], human),
                   "delta_ci95": ci95(sb[a] - sb[b]) if args.boot_bench else [float("nan")] * 2}
             bench_pairs.append(pr)
-            print(f"    paros: {a} - {b}: {pr['delta']:+.4f} [{pr['delta_ci95'][0]:+.4f}, {pr['delta_ci95'][1]:+.4f}]")
+            print(f"    paired: {a} - {b}: {pr['delta']:+.4f} [{pr['delta_ci95'][0]:+.4f}, {pr['delta_ci95'][1]:+.4f}]")
 
-    # ---- leiro szamok
+    # ---- descriptive figures
     kv = keep[keep.vader_valence.notna()]
     flips = int((np.sign(kv.valence) != np.sign(kv.vader_valence)).sum())
     tier_counts = keep.tier.value_counts().to_dict()
@@ -1137,7 +1136,7 @@ def main():
     results = {
         "version": VERSION, "built": datetime.date.today().isoformat(), "seed": args.seed,
         "corpus": {"reviews_total": int(total), "train": counts["train"], "validation": counts["val"], "test": counts["test"],
-                   "excluded_benchmark": counts["bench_kizarva"], "empty": counts["ures"],
+                   "excluded_benchmark": counts["bench_excluded"], "empty": counts["empty"],
                    "rec_share_train": pos_counts["train"] / max(counts["train"], 1),
                    "rec_share_test": pos_counts["test"] / max(counts["test"], 1),
                    "length_bins": [{"tokens": (f"{(LEN_EDGES[i - 1] + 1) if i else 1}-{LEN_EDGES[i]}" if i < NB - 1 else f"{LEN_EDGES[-1] + 1}+"),
@@ -1156,12 +1155,12 @@ def main():
                                "rows": test_rows, "delta_auc_full_vs_vader": d_auc, "delta_auc_ci95": ci,
                                "bootstrap": args.boot},
         "evaluation_genres": {"rows": genre_rows, "across_genres": genre_corr, "note": genre_note},
-        "evaluation_sentences": {"third_rater": gt_status, "rows": bench_rows, "paired": bench_pairs, "rater_agreement": agreement},
+        "evaluation_sentences": {"third_rater": r3_status, "rows": bench_rows, "paired": bench_pairs, "rater_agreement": agreement},
         "evaluation_reviews_paired": pair_rows,
         "top_negative": top_neg, "top_positive": top_pos,
     }
 
-    # ---- kiiras
+    # ---- writing the release
     os.makedirs(outdir, exist_ok=True)
     out = keep.rename(columns={"word": "term", "slang_type": "category", "n_train": "n_reviews"})
     for c in ("rec_share", "expected_rec_share", "assoc", "log_odds"):
@@ -1188,7 +1187,7 @@ def main():
         json.dump(results, f, ensure_ascii=False, indent=1, default=float)
     with open(os.path.join(outdir, "gamerlex.py"), "w", encoding="utf-8", newline="\n") as f:
         f.write(HELPER_PY)
-    # belso kiertekelesi fajlok (review-szoveget tartalmaznak, nem a kiadas reszei)
+    # internal evaluation files (contain review texts, not part of the release)
     os.makedirs(evaldir, exist_ok=True)
     ev = pd.DataFrame({"text": test_texts, "recommended": test_y_arr.astype(int), "n_tokens": test_len,
                        "length_bin": test_bin, "has_curated_term": has.astype(int), "has_any_term": has_any.astype(int)})
@@ -1262,7 +1261,7 @@ def main():
             L.append(f"  Spearman across {genre_corr['n_genres']} genres between recommending share and mean score: "
                      f"VADER {genre_corr['spearman_recshare_vs_mean_vader']:+.3f}, GamerLex full {genre_corr['spearman_recshare_vs_mean_gamerlex']:+.3f}.")
         L.append("")
-    L.append(f"Third rater file: {gt_status}.")
+    L.append(f"Third rater file: {r3_status}.")
     if agreement:
         L.append(f"Rater agreement: A1-A2 Spearman {agreement['spearman_A1_A2']:.4f}; Krippendorff's alpha (interval) two raters {agreement['alpha_interval_two']:.4f}, "
                  f"(ordinal) {agreement['alpha_ordinal_two']:.4f}"
@@ -1340,7 +1339,6 @@ def main():
     ind_k_txt = "{:,}".format(IND_K)
     share_has = "%.1f%%" % (100 * has.mean())
     p_test_txt = "%.0f%%" % (100 * (1 - P_TRAIN - P_VAL))
-    snippet = 'sia.lexicon.update({t: float(v) for t, v in (line.rstrip("\\n").split("\\t") for line in f)})'
     readme = f"""# GamerLex v{VERSION}
 
 GamerLex is a sentiment lexicon for video game reviews, built from {c['reviews_total']:,} Steam reviews. Its curated part is a hand-audited vocabulary of gaming slang and jargon; an optional automatic tier adds frequent review vocabulary selected by rule. Every entry carries a corpus-derived valence on the VADER scale. The lexicon is designed to be used together with VADER: its entries add vocabulary that VADER does not know and replace VADER values for words whose meaning shifts in game reviews (for example *kill*, *scary*, *brutal*).
@@ -1470,8 +1468,8 @@ keywords:
         f.write(cff)
 
     print("\n" + report)
-    print("\nKiadasi csomag:", outdir)
-    print(f"Futasido: {time.time() - t0:.0f} mp")
+    print("\nRelease package:", outdir)
+    print(f"Run time: {time.time() - t0:.0f} s")
 
 
 if __name__ == "__main__":
