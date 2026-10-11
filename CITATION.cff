@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use GamerLex, please cite it as below."
+title: "GamerLex: a lexicon of gaming slang and jargon with corpus-derived valence"
+type: dataset
+version: "1.0"
+date-released: "2026-10-11"
+authors:
+  - family-names: Guzsvinecz
+    given-names: Tibor
+    affiliation: "University of Pannonia"
+keywords:
+  - sentiment analysis
+  - lexicon
+  - video games
+  - Steam reviews
+  - slang

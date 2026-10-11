@@ -1,0 +1,1381 @@
+{
+ "version": "1.0",
+ "built": "2026-10-11",
+ "seed": 42,
+ "corpus": {
+  "reviews_total": 4691606,
+  "train": 3261496,
+  "validation": 465514,
+  "test": 931196,
+  "excluded_benchmark": 2148,
+  "empty": 31252,
+  "rec_share_train": 0.8143790456894627,
+  "rec_share_test": 0.8144815914157707,
+  "length_bins": [
+   {
+    "tokens": "1-5",
+    "reviews": 617527,
+    "rec_share": 0.9020107622824589
+   },
+   {
+    "tokens": "6-10",
+    "reviews": 383305,
+    "rec_share": 0.8680815538539806
+   },
+   {
+    "tokens": "11-20",
+    "reviews": 493838,
+    "rec_share": 0.8418448965045218
+   },
+   {
+    "tokens": "21-40",
+    "reviews": 532735,
+    "rec_share": 0.8082311092757187
+   },
+   {
+    "tokens": "41-80",
+    "reviews": 509111,
+    "rec_share": 0.7730219932391954
+   },
+   {
+    "tokens": "81-160",
+    "reviews": 382631,
+    "rec_share": 0.7411527032571851
+   },
+   {
+    "tokens": "161-320",
+    "reviews": 218025,
+    "rec_share": 0.7168673317280129
+   },
+   {
+    "tokens": "321+",
+    "reviews": 124324,
+    "rec_share": 0.6965107300279914
+   }
+  ]
+ },
+ "method": {
+  "split": [
+   0.7,
+   0.1,
+   0.2
+  ],
+  "min_train_reviews": 5,
+  "override_rule": {
+   "assoc_le": -0.1,
+   "z_le": -3.0
+  },
+  "anchor_min_reviews": 500,
+  "shrinkage_n0": 25.0,
+  "valence_clip": 4.0,
+  "tokenizer": "[a-z0-9'*-]+"
+ },
+ "lexicon": {
+  "n_entries": 8046,
+  "n_curated": 4223,
+  "n_auto": 3823,
+  "n_input": 4344,
+  "n_dropped": 121,
+  "dropped_by_reason": {
+   "fewer than 5 training reviews": 85,
+   "not matchable by the reference tokenizer": 19,
+   "override candidate with clearly negative corpus association (VADER value retained)": 17
+  },
+  "by_tier": {
+   "auto": 3823,
+   "core": 3593,
+   "extended": 436,
+   "vader_override": 194
+  },
+  "by_category": {
+   "general": 3823,
+   "mechanic": 2861,
+   "reaction": 603,
+   "industry": 390,
+   "skill": 170,
+   "toxic": 150,
+   "meta": 49
+  },
+  "n_multiword": 281,
+  "n_also_in_vader": 292,
+  "n_sign_differs_from_vader": 178,
+  "valence_negative_le_-0.5": 2771,
+  "valence_neutral": 2227,
+  "valence_positive_ge_0.5": 3048,
+  "median_n_train": 436.5
+ },
+ "override_tier": {
+  "n": 194,
+  "mean_vader_valence": -2.004123711340206,
+  "mean_gamerlex_valence": 0.3739175257731959,
+  "share_sign_differs": 0.7268041237113402
+ },
+ "auto_tier": {
+  "n": 3823,
+  "rule": {
+   "token_class": "content",
+   "word_form": "[a-z]+(?:-[a-z]+)*",
+   "not_in_vader": true,
+   "not_in_curated_tiers": true,
+   "min_train_reviews": 100,
+   "min_abs_z": 5.0,
+   "min_abs_valence": 0.5,
+   "candidate_pool": "30000 most frequent tokens of a label-free sample of 300000 reviews",
+   "function_words": "scikit-learn English stop list plus VADER negations and boosters, and n't contractions",
+   "proper_noun": {
+    "min_mid_sentence_occurrences": 20,
+    "min_capitalised_share": 0.5
+   }
+  },
+  "token_classes_in_candidate_pool": {
+   "content": 12471,
+   "proper_noun": 870,
+   "other_form": 349,
+   "function": 346,
+   "digit": 245,
+   "short": 148
+  },
+  "n_negative": 1695,
+  "n_positive": 2128,
+  "most_frequent": [
+   [
+    "just",
+    -0.76,
+    572902
+   ],
+   [
+    "story",
+    0.75,
+    342280
+   ],
+   [
+    "bit",
+    1.02,
+    200010
+   ],
+   [
+    "buy",
+    -0.68,
+    190944
+   ],
+   [
+    "different",
+    0.73,
+    152629
+   ],
+   [
+    "experience",
+    0.57,
+    151945
+   ],
+   [
+    "music",
+    0.93,
+    149729
+   ],
+   [
+    "work",
+    -0.66,
+    149241
+   ],
+   [
+    "short",
+    0.5,
+    145223
+   ],
+   [
+    "characters",
+    0.66,
+    144504
+   ],
+   [
+    "overall",
+    0.85,
+    140284
+   ],
+   [
+    "world",
+    0.67,
+    122275
+   ],
+   [
+    "money",
+    -1.34,
+    120031
+   ],
+   [
+    "simple",
+    0.89,
+    119258
+   ],
+   [
+    "puzzles",
+    0.67,
+    108562
+   ],
+   [
+    "style",
+    0.87,
+    106915
+   ],
+   [
+    "art",
+    0.78,
+    103478
+   ],
+   [
+    "controls",
+    -0.68,
+    96836
+   ],
+   [
+    "maybe",
+    -0.5,
+    92869
+   ],
+   [
+    "bought",
+    -0.62,
+    87598
+   ],
+   [
+    "trying",
+    -0.63,
+    84473
+   ],
+   [
+    "unique",
+    1.45,
+    83200
+   ],
+   [
+    "puzzle",
+    0.75,
+    81191
+   ],
+   [
+    "life",
+    0.59,
+    79572
+   ],
+   [
+    "instead",
+    -0.9,
+    77791
+   ]
+  ],
+  "top_negative": [
+   [
+    "uninstalled",
+    -3.11,
+    3336
+   ],
+   [
+    "requested",
+    -3.1,
+    3075
+   ],
+   [
+    "requesting",
+    -2.98,
+    997
+   ],
+   [
+    "pos",
+    -2.94,
+    846
+   ],
+   [
+    "redeeming",
+    -2.93,
+    1547
+   ],
+   [
+    "uninstalling",
+    -2.92,
+    1423
+   ],
+   [
+    "steaming",
+    -2.9,
+    741
+   ],
+   [
+    "refunding",
+    -2.89,
+    2612
+   ],
+   [
+    "straw",
+    -2.69,
+    652
+   ],
+   [
+    "conscience",
+    -2.68,
+    913
+   ],
+   [
+    "unrewarding",
+    -2.6,
+    924
+   ],
+   [
+    "unimaginative",
+    -2.59,
+    546
+   ],
+   [
+    "poorly",
+    -2.49,
+    16325
+   ],
+   [
+    "uninstall",
+    -2.45,
+    3296
+   ],
+   [
+    "dissapointment",
+    -2.39,
+    855
+   ]
+  ],
+  "top_positive": [
+   [
+    "underrated",
+    3.63,
+    6923
+   ],
+   [
+    "must-buy",
+    3.54,
+    922
+   ],
+   [
+    "must-play",
+    3.17,
+    1397
+   ],
+   [
+    "must-have",
+    3.13,
+    1972
+   ],
+   [
+    "immerses",
+    3.04,
+    536
+   ],
+   [
+    "addicting",
+    2.92,
+    14947
+   ],
+   [
+    "addictive",
+    2.82,
+    26328
+   ],
+   [
+    "unforgettable",
+    2.7,
+    1040
+   ],
+   [
+    "wholesome",
+    2.66,
+    3671
+   ],
+   [
+    "loveable",
+    2.62,
+    744
+   ],
+   [
+    "brrr",
+    2.56,
+    552
+   ],
+   [
+    "goosebumps",
+    2.5,
+    729
+   ],
+   [
+    "chilled",
+    2.49,
+    790
+   ],
+   [
+    "mesmerizing",
+    2.47,
+    766
+   ],
+   [
+    "deceptively",
+    2.45,
+    1330
+   ]
+  ]
+ },
+ "calibration": {
+  "n_anchors": 1449,
+  "pearson": 0.5353883666054556,
+  "spearman": 0.542440929236016,
+  "sign_agreement": 0.7294685990338164,
+  "k_single": 1.2931216394270895,
+  "k_pos": 1.2746378195936594,
+  "k_neg": 1.319708769556109,
+  "chosen": "piecewise",
+  "k_pos_used": 1.2746378195936594,
+  "k_neg_used": 1.319708769556109,
+  "validation_auc": {
+   "single": 0.7796110244532417,
+   "piecewise": 0.780524679381744
+  },
+  "validation_sample": 49475
+ },
+ "induced_baseline": {
+  "top_k_tokens": 30000,
+  "frequency_sample": 300000,
+  "min_abs_z": 3.0,
+  "n_entries": 14429,
+  "n_not_in_vader": 12414,
+  "n_also_in_gamerlex": 1463
+ },
+ "evaluation_reviews": {
+  "test_sample": 99389,
+  "share_with_curated_term": 0.6280473694272002,
+  "share_with_any_term": 0.8121522502490215,
+  "rows": [
+   {
+    "variant": "VADER",
+    "n_added_entries": 0,
+    "auc": 0.7494604385265758,
+    "auc_length_stratified": 0.8244700950520355,
+    "auc_with_term": 0.759569262693713,
+    "balanced_accuracy": 0.6974094644872401,
+    "coverage": 0.8951896085079838
+   },
+   {
+    "variant": "VADER + core",
+    "n_added_entries": 3593,
+    "auc": 0.791226608933788,
+    "auc_length_stratified": 0.8508676520477115,
+    "auc_with_term": 0.8023370443182879,
+    "balanced_accuracy": 0.7437958058575802,
+    "coverage": 0.9216814738049482,
+    "delta_auc": 0.0417661704072122,
+    "delta_auc_strat": 0.02639755699567603,
+    "delta_auc_ci95": [
+     0.03968391290671376,
+     0.04330769512494071
+    ],
+    "delta_auc_strat_ci95": [
+     0.024898029769610145,
+     0.027575953595049482
+    ]
+   },
+   {
+    "variant": "VADER + core + extended",
+    "n_added_entries": 4029,
+    "auc": 0.796072833598875,
+    "auc_length_stratified": 0.8537793644553403,
+    "auc_with_term": 0.8073679826651347,
+    "balanced_accuracy": 0.7484483484891966,
+    "coverage": 0.9228486049764059,
+    "delta_auc": 0.046612395072299195,
+    "delta_auc_strat": 0.029309269403304805,
+    "delta_auc_ci95": [
+     0.044379640171107876,
+     0.04815170066912812
+    ],
+    "delta_auc_strat_ci95": [
+     0.027813978531426354,
+     0.030652229799905503
+    ]
+   },
+   {
+    "variant": "VADER + GamerLex curated",
+    "n_added_entries": 4223,
+    "auc": 0.7855884671751682,
+    "auc_length_stratified": 0.8674309258234394,
+    "auc_with_term": 0.8078340067333231,
+    "balanced_accuracy": 0.7384528116256188,
+    "coverage": 0.923019650061878,
+    "delta_auc": 0.036128028648592325,
+    "delta_auc_strat": 0.04296083077140389,
+    "delta_auc_ci95": [
+     0.03394211183770894,
+     0.03823399803539405
+    ],
+    "delta_auc_strat_ci95": [
+     0.04141662722543986,
+     0.04461107622473981
+    ]
+   },
+   {
+    "variant": "VADER + auto tier",
+    "n_added_entries": 3823,
+    "auc": 0.8087836234453338,
+    "auc_length_stratified": 0.8656360017837,
+    "auc_with_term": 0.8197449449817972,
+    "balanced_accuracy": 0.7520135285128786,
+    "coverage": 0.9365120888629527,
+    "delta_auc": 0.05932318491875799,
+    "delta_auc_strat": 0.04116590673166454,
+    "delta_auc_ci95": [
+     0.05697678671711979,
+     0.061531765874194455
+    ],
+    "delta_auc_strat_ci95": [
+     0.03957136059361856,
+     0.04266140356488313
+    ]
+   },
+   {
+    "variant": "VADER + GamerLex full",
+    "n_added_entries": 8046,
+    "auc": 0.8292091973006299,
+    "auc_length_stratified": 0.8930084243535257,
+    "auc_with_term": 0.8477774361583552,
+    "balanced_accuracy": 0.7789310116762944,
+    "coverage": 0.9521375604946222,
+    "delta_auc": 0.07974875877405407,
+    "delta_auc_strat": 0.06853832930149018,
+    "delta_auc_ci95": [
+     0.07653632063434315,
+     0.08269279429949004
+    ],
+    "delta_auc_strat_ci95": [
+     0.06649228837500419,
+     0.07059375871031857
+    ]
+   },
+   {
+    "variant": "GamerLex full only",
+    "n_added_entries": 8046,
+    "auc": 0.8003282302325674,
+    "auc_length_stratified": 0.7933362413903853,
+    "auc_with_term": 0.8245978709809868,
+    "balanced_accuracy": 0.7468080136261168,
+    "coverage": 0.8084898731247925,
+    "delta_auc": 0.05086779170599154,
+    "delta_auc_strat": -0.031133853661650224,
+    "delta_auc_ci95": [
+     0.04560319891383767,
+     0.05559434154293548
+    ],
+    "delta_auc_strat_ci95": [
+     -0.036093714110665115,
+     -0.02567194403523493
+    ]
+   },
+   {
+    "variant": "VADER + induced (new words)",
+    "n_added_entries": 12414,
+    "auc": 0.8593906798758887,
+    "auc_length_stratified": 0.8915233925015461,
+    "auc_with_term": 0.8657772450179749,
+    "balanced_accuracy": 0.8069216550318186,
+    "coverage": 0.9768686675587842,
+    "delta_auc": 0.10993024134931284,
+    "delta_auc_strat": 0.06705329744951061,
+    "delta_auc_ci95": [
+     0.10665172575808216,
+     0.11371906208293317
+    ],
+    "delta_auc_strat_ci95": [
+     0.06412165918056598,
+     0.06972442539092842
+    ]
+   },
+   {
+    "variant": "VADER + induced (all frequent words)",
+    "n_added_entries": 14429,
+    "auc": 0.8985370570404365,
+    "auc_length_stratified": 0.9137030981265309,
+    "auc_with_term": 0.8974236105497022,
+    "balanced_accuracy": 0.8378149663281383,
+    "coverage": 0.976737868375776,
+    "delta_auc": 0.14907661851386067,
+    "delta_auc_strat": 0.08923300307449544,
+    "delta_auc_ci95": [
+     0.14535329485608714,
+     0.15323722590990765
+    ],
+    "delta_auc_strat_ci95": [
+     0.0856509799355031,
+     0.09254027653050038
+    ]
+   }
+  ],
+  "delta_auc_full_vs_vader": 0.07974875877405407,
+  "delta_auc_ci95": [
+   0.07653632063434315,
+   0.08269279429949004
+  ],
+  "bootstrap": 200
+ },
+ "evaluation_genres": {
+  "rows": [
+   {
+    "genre": "Action",
+    "n": 60008,
+    "rec_share": 0.8079089454739368,
+    "mean_vader": 0.38832153046260504,
+    "mean_gamerlex": 0.42199148113584856,
+    "auc_vader": 0.7539521103094308,
+    "auc_gamerlex": 0.8332404198194753,
+    "auc_strat_vader": 0.820727223043525,
+    "auc_strat_curated": 0.866868088635806,
+    "auc_strat_gamerlex": 0.8908123797063611
+   },
+   {
+    "genre": "Adventure",
+    "n": 17634,
+    "rec_share": 0.8340705455370307,
+    "mean_vader": 0.4984683622547351,
+    "mean_gamerlex": 0.532324764659181,
+    "auc_vader": 0.7373106010260155,
+    "auc_gamerlex": 0.807142831582628,
+    "auc_strat_vader": 0.8274898869504752,
+    "auc_strat_curated": 0.8612911629598797,
+    "auc_strat_gamerlex": 0.892831167590913
+   },
+   {
+    "genre": "Casual",
+    "n": 7237,
+    "rec_share": 0.8485560315047672,
+    "mean_vader": 0.5051408871079176,
+    "mean_gamerlex": 0.5061914467320713,
+    "auc_vader": 0.7147643961788481,
+    "auc_gamerlex": 0.8086711816116874,
+    "auc_strat_vader": 0.8265642738491671,
+    "auc_strat_curated": 0.861510669136988,
+    "auc_strat_gamerlex": 0.8887642339645427
+   },
+   {
+    "genre": "Puzzle",
+    "n": 860,
+    "rec_share": 0.8546511627906976,
+    "mean_vader": 0.4920941860465117,
+    "mean_gamerlex": 0.5408681395348837,
+    "auc_vader": 0.7418884353741496,
+    "auc_gamerlex": 0.8077115646258504,
+    "auc_strat_vader": 0.8461192074668413,
+    "auc_strat_curated": 0.8783363353528737,
+    "auc_strat_gamerlex": 0.8991321434419518
+   },
+   {
+    "genre": "RPG",
+    "n": 3027,
+    "rec_share": 0.7862570201519656,
+    "mean_vader": 0.4472332342253056,
+    "mean_gamerlex": 0.469910835811034,
+    "auc_vader": 0.7704518592599328,
+    "auc_gamerlex": 0.8436500720844752,
+    "auc_strat_vader": 0.8255446411204046,
+    "auc_strat_curated": 0.8720749854113986,
+    "auc_strat_gamerlex": 0.9012643454580821
+   },
+   {
+    "genre": "Racing",
+    "n": 1049,
+    "rec_share": 0.8017159199237369,
+    "mean_vader": 0.43893393708293615,
+    "mean_gamerlex": 0.400549857006673,
+    "auc_vader": 0.7744043263514132,
+    "auc_gamerlex": 0.8376274810207628,
+    "auc_strat_vader": 0.8627879906879666,
+    "auc_strat_curated": 0.8833186160391747,
+    "auc_strat_gamerlex": 0.9048727623023199
+   },
+   {
+    "genre": "Simulation",
+    "n": 6935,
+    "rec_share": 0.7901946647440519,
+    "mean_vader": 0.41285209805335255,
+    "mean_gamerlex": 0.3832988896899784,
+    "auc_vader": 0.7442975393182332,
+    "auc_gamerlex": 0.8476652369127349,
+    "auc_strat_vader": 0.8290959309652155,
+    "auc_strat_curated": 0.8761891685506532,
+    "auc_strat_gamerlex": 0.8993255265444614
+   },
+   {
+    "genre": "Sports",
+    "n": 250,
+    "rec_share": 0.828,
+    "mean_vader": 0.46951919999999997,
+    "mean_gamerlex": 0.4354152,
+    "auc_vader": 0.6859341647005954,
+    "auc_gamerlex": 0.8228288956297045,
+    "auc_strat_vader": 0.8851819757365684,
+    "auc_strat_curated": 0.9228769497400346,
+    "auc_strat_gamerlex": 0.9432409012131716
+   },
+   {
+    "genre": "Strategy",
+    "n": 2191,
+    "rec_share": 0.7722501141031493,
+    "mean_vader": 0.42485089000456416,
+    "mean_gamerlex": 0.4479228662711091,
+    "auc_vader": 0.7591222634394084,
+    "auc_gamerlex": 0.8438194355614302,
+    "auc_strat_vader": 0.8189900057159684,
+    "auc_strat_curated": 0.8624356953562088,
+    "auc_strat_gamerlex": 0.8955753208736771
+   }
+  ],
+  "across_genres": {
+   "n_genres": 9,
+   "spearman_recshare_vs_mean_vader": 0.7,
+   "spearman_recshare_vs_mean_gamerlex": 0.5833333333333334
+  },
+  "note": "each review carries one genre label; genres with fewer than 200 test reviews are not shown"
+ },
+ "evaluation_sentences": {
+  "third_rater": "used (1481 sentences rated)",
+  "rows": [
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER",
+    "spearman_human": 0.570555815484108,
+    "coverage": 0.8454172366621067,
+    "sign_accuracy_nonneutral": 0.6335453100158982,
+    "n_nonneutral": 1258
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + core",
+    "spearman_human": 0.6148825867490864,
+    "coverage": 0.9370725034199726,
+    "sign_accuracy_nonneutral": 0.7130365659777425,
+    "n_nonneutral": 1258,
+    "delta": 0.044326771264978304,
+    "delta_ci95": [
+     0.028607982645187293,
+     0.06035778670175963
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + core + extended",
+    "spearman_human": 0.6199378015443381,
+    "coverage": 0.9404924760601915,
+    "sign_accuracy_nonneutral": 0.7201907790143084,
+    "n_nonneutral": 1258,
+    "delta": 0.04938198606023003,
+    "delta_ci95": [
+     0.03297888183561817,
+     0.06598172748066614
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + GamerLex curated",
+    "spearman_human": 0.6391808421626434,
+    "coverage": 0.9404924760601915,
+    "sign_accuracy_nonneutral": 0.7146263910969793,
+    "n_nonneutral": 1258,
+    "delta": 0.06862502667853532,
+    "delta_ci95": [
+     0.045569608817507684,
+     0.08985238311298863
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + auto tier",
+    "spearman_human": 0.6151963058253525,
+    "coverage": 0.9425444596443229,
+    "sign_accuracy_nonneutral": 0.7241653418124007,
+    "n_nonneutral": 1258,
+    "delta": 0.0446404903412444,
+    "delta_ci95": [
+     0.02526886256101992,
+     0.06322558512543745
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + GamerLex full",
+    "spearman_human": 0.6603976268984734,
+    "coverage": 0.9794801641586868,
+    "sign_accuracy_nonneutral": 0.766295707472178,
+    "n_nonneutral": 1258,
+    "delta": 0.08984181141436531,
+    "delta_ci95": [
+     0.06244423883557759,
+     0.11573049592091955
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "GamerLex full only",
+    "spearman_human": 0.41575667452186116,
+    "coverage": 0.9008207934336525,
+    "sign_accuracy_nonneutral": 0.6248012718600954,
+    "n_nonneutral": 1258,
+    "delta": -0.1547991409622469,
+    "delta_ci95": [
+     -0.20862516507324688,
+     -0.09952827014151386
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + induced (new words)",
+    "spearman_human": 0.6256630609208883,
+    "coverage": 0.9993160054719562,
+    "sign_accuracy_nonneutral": 0.7694753577106518,
+    "n_nonneutral": 1258,
+    "delta": 0.05510724543678025,
+    "delta_ci95": [
+     0.024719847932546026,
+     0.08491247673578829
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "n": 1462,
+    "variant": "VADER + induced (all frequent words)",
+    "spearman_human": 0.6249023964640388,
+    "coverage": 0.9993160054719562,
+    "sign_accuracy_nonneutral": 0.7885532591414944,
+    "n_nonneutral": 1258,
+    "delta": 0.054346580979930725,
+    "delta_ci95": [
+     0.01219244183700551,
+     0.09672392801866149
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER",
+    "spearman_human": 0.5787476742768414,
+    "coverage": 0.8454172366621067,
+    "sign_accuracy_nonneutral": 0.725576289791438,
+    "n_nonneutral": 911
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + core",
+    "spearman_human": 0.6176137282803225,
+    "coverage": 0.9370725034199726,
+    "sign_accuracy_nonneutral": 0.7980241492864983,
+    "n_nonneutral": 911,
+    "delta": 0.03886605400348109,
+    "delta_ci95": [
+     0.02305697337514016,
+     0.05610001384850421
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + core + extended",
+    "spearman_human": 0.6241273807879196,
+    "coverage": 0.9404924760601915,
+    "sign_accuracy_nonneutral": 0.8090010976948409,
+    "n_nonneutral": 911,
+    "delta": 0.045379706511078255,
+    "delta_ci95": [
+     0.0282946712132807,
+     0.0632392980856519
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + GamerLex curated",
+    "spearman_human": 0.6455335270655564,
+    "coverage": 0.9404924760601915,
+    "sign_accuracy_nonneutral": 0.8035126234906695,
+    "n_nonneutral": 911,
+    "delta": 0.06678585278871507,
+    "delta_ci95": [
+     0.04442379045755111,
+     0.08787676414747683
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + auto tier",
+    "spearman_human": 0.6224556432569225,
+    "coverage": 0.9425444596443229,
+    "sign_accuracy_nonneutral": 0.7947310647639956,
+    "n_nonneutral": 911,
+    "delta": 0.04370796898008111,
+    "delta_ci95": [
+     0.025017404707663653,
+     0.062305000091853316
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + GamerLex full",
+    "spearman_human": 0.6638095946329227,
+    "coverage": 0.9794801641586868,
+    "sign_accuracy_nonneutral": 0.8364434687156971,
+    "n_nonneutral": 911,
+    "delta": 0.08506192035608129,
+    "delta_ci95": [
+     0.058206245298241394,
+     0.11151407077879893
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "GamerLex full only",
+    "spearman_human": 0.4072813678023227,
+    "coverage": 0.9008207934336525,
+    "sign_accuracy_nonneutral": 0.6509330406147091,
+    "n_nonneutral": 911,
+    "delta": -0.17146630647451866,
+    "delta_ci95": [
+     -0.2270184634500657,
+     -0.11720451523007573
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + induced (new words)",
+    "spearman_human": 0.6338215960445366,
+    "coverage": 0.9993160054719562,
+    "sign_accuracy_nonneutral": 0.8364434687156971,
+    "n_nonneutral": 911,
+    "delta": 0.05507392176769521,
+    "delta_ci95": [
+     0.02375775244953012,
+     0.0837991896493865
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "n": 1462,
+    "variant": "VADER + induced (all frequent words)",
+    "spearman_human": 0.6197388194387314,
+    "coverage": 0.9993160054719562,
+    "sign_accuracy_nonneutral": 0.8430296377607025,
+    "n_nonneutral": 911,
+    "delta": 0.040991145161890064,
+    "delta_ci95": [
+     -0.0016128723078881655,
+     0.08126734087667381
+    ]
+   }
+  ],
+  "paired": [
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + induced (new words)",
+    "delta": 0.034734565977585063,
+    "delta_ci95": [
+     0.013922401606545436,
+     0.05764123204722715
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + induced (all frequent words)",
+    "delta": 0.03549523043443459,
+    "delta_ci95": [
+     0.005192908874505814,
+     0.06496512429067008
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + GamerLex curated",
+    "delta": 0.021216784735829997,
+    "delta_ci95": [
+     0.005665860497368063,
+     0.0383531981198262
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + auto tier",
+    "delta": 0.045201321073120915,
+    "delta_ci95": [
+     0.02789831171323847,
+     0.06241380462557949
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex curated",
+    "b": "VADER + induced (new words)",
+    "delta": 0.013517781241755067,
+    "delta_ci95": [
+     -0.01313837481220742,
+     0.0403974849255589
+    ]
+   },
+   {
+    "gold": "mean of two annotators",
+    "a": "VADER + GamerLex curated",
+    "b": "VADER + induced (all frequent words)",
+    "delta": 0.014278445698604592,
+    "delta_ci95": [
+     -0.02078763731252698,
+     0.048432951387344055
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + induced (new words)",
+    "delta": 0.029987998588386078,
+    "delta_ci95": [
+     0.008737913228934075,
+     0.05139588070349399
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + induced (all frequent words)",
+    "delta": 0.044070775194191225,
+    "delta_ci95": [
+     0.015578877178312868,
+     0.07385812669081371
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + GamerLex curated",
+    "delta": 0.018276067567366217,
+    "delta_ci95": [
+     0.0027303514012921646,
+     0.034312760799920655
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex full",
+    "b": "VADER + auto tier",
+    "delta": 0.041353951376000175,
+    "delta_ci95": [
+     0.025352942311192644,
+     0.058120346102403304
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex curated",
+    "b": "VADER + induced (new words)",
+    "delta": 0.011711931021019861,
+    "delta_ci95": [
+     -0.014526769660808157,
+     0.03751102223163016
+    ]
+   },
+   {
+    "gold": "median of three raters",
+    "a": "VADER + GamerLex curated",
+    "b": "VADER + induced (all frequent words)",
+    "delta": 0.02579470762682501,
+    "delta_ci95": [
+     -0.0077952049740107054,
+     0.05950171049524433
+    ]
+   }
+  ],
+  "rater_agreement": {
+   "spearman_A1_A2": 0.543238001524021,
+   "alpha_interval_two": 0.45155338128725975,
+   "alpha_ordinal_two": 0.4741430015134547,
+   "n_sentences": 1462,
+   "pairs": [
+    {
+     "raters": "A1-A2",
+     "spearman": 0.543238001524021,
+     "exact": 0.28522571819425446,
+     "within_one": 0.7339261285909713
+    },
+    {
+     "raters": "A1-GT",
+     "spearman": 0.7271945217848724,
+     "exact": 0.38782489740082077,
+     "within_one": 0.8454172366621067
+    },
+    {
+     "raters": "A2-GT",
+     "spearman": 0.6456418073744095,
+     "exact": 0.521203830369357,
+     "within_one": 0.914500683994528
+    }
+   ],
+   "leave_one_out_spearman": {
+    "A1": 0.7108674307582526,
+    "A2": 0.6303588472740076,
+    "GT": 0.7840084902459571
+   },
+   "alpha_interval_three": 0.5829320331779545,
+   "alpha_ordinal_three": 0.5993055250280052
+  }
+ },
+ "evaluation_reviews_paired": [
+  {
+   "a": "VADER + GamerLex full",
+   "b": "VADER + induced (new words)",
+   "delta_auc": -0.030181482575258767,
+   "delta_auc_ci95": [
+    -0.03277140111382206,
+    -0.028142528841607107
+   ],
+   "delta_auc_strat": 0.001485031851979568,
+   "delta_auc_strat_ci95": [
+    -3.504895760835789e-05,
+    0.003248830095445238
+   ]
+  },
+  {
+   "a": "VADER + GamerLex full",
+   "b": "VADER + induced (all frequent words)",
+   "delta_auc": -0.0693278597398066,
+   "delta_auc_ci95": [
+    -0.07279765445250469,
+    -0.06609066536931922
+   ],
+   "delta_auc_strat": -0.020694673773005268,
+   "delta_auc_strat_ci95": [
+    -0.022666684143604062,
+    -0.018881963701212444
+   ]
+  },
+  {
+   "a": "VADER + GamerLex full",
+   "b": "VADER + GamerLex curated",
+   "delta_auc": 0.04362073012546175,
+   "delta_auc_ci95": [
+    0.04160472280676523,
+    0.04560023418721274
+   ],
+   "delta_auc_strat": 0.025577498530086284,
+   "delta_auc_strat_ci95": [
+    0.02436236469790976,
+    0.026943501695014173
+   ]
+  },
+  {
+   "a": "VADER + GamerLex full",
+   "b": "VADER + auto tier",
+   "delta_auc": 0.020425573855296086,
+   "delta_auc_ci95": [
+    0.01844185525990915,
+    0.02199172398965667
+   ],
+   "delta_auc_strat": 0.02737242256982564,
+   "delta_auc_strat_ci95": [
+    0.026038251707771472,
+    0.028715213583744403
+   ]
+  },
+  {
+   "a": "VADER + GamerLex curated",
+   "b": "VADER + induced (new words)",
+   "delta_auc": -0.07380221270072052,
+   "delta_auc_ci95": [
+    -0.07698381671126418,
+    -0.07090528621409092
+   ],
+   "delta_auc_strat": -0.024092466678106716,
+   "delta_auc_strat_ci95": [
+    -0.025995545209277663,
+    -0.02162070438789214
+   ]
+  },
+  {
+   "a": "VADER + GamerLex curated",
+   "b": "VADER + induced (all frequent words)",
+   "delta_auc": -0.11294858986526835,
+   "delta_auc_ci95": [
+    -0.11716040654812539,
+    -0.10941601881503386
+   ],
+   "delta_auc_strat": -0.04627217230309155,
+   "delta_auc_strat_ci95": [
+    -0.04879354762582952,
+    -0.043434036964004566
+   ]
+  }
+ ],
+ "top_negative": [
+  [
+   "abandonware",
+   -3.79,
+   1383
+  ],
+  [
+   "scammed",
+   -3.43,
+   741
+  ],
+  [
+   "refund",
+   -3.37,
+   30085
+  ],
+  [
+   "refunded",
+   -3.22,
+   6534
+  ],
+  [
+   "unplayable",
+   -3.18,
+   19856
+  ],
+  [
+   "dogshit",
+   -3.09,
+   866
+  ],
+  [
+   "garbage",
+   -2.98,
+   15565
+  ],
+  [
+   "refunds",
+   -2.95,
+   1057
+  ],
+  [
+   "turd",
+   -2.94,
+   871
+  ],
+  [
+   "unfun",
+   -2.89,
+   1627
+  ],
+  [
+   "uninspiring",
+   -2.64,
+   720
+  ],
+  [
+   "unenjoyable",
+   -2.64,
+   888
+  ],
+  [
+   "uninteresting",
+   -2.6,
+   3666
+  ],
+  [
+   "uninspired",
+   -2.53,
+   3296
+  ],
+  [
+   "shite",
+   -2.51,
+   677
+  ]
+ ],
+ "top_positive": [
+  [
+   "pog",
+   2.88,
+   2060
+  ],
+  [
+   "banger",
+   2.67,
+   2235
+  ],
+  [
+   "poggers",
+   2.53,
+   997
+  ],
+  [
+   "goated",
+   2.51,
+   501
+  ],
+  [
+   "noice",
+   2.28,
+   1492
+  ],
+  [
+   "monke",
+   2.14,
+   910
+  ],
+  [
+   "sweating",
+   2.09,
+   547
+  ],
+  [
+   "terrifying",
+   1.92,
+   3723
+  ],
+  [
+   "multiple endings",
+   1.89,
+   3651
+  ],
+  [
+   "hooked",
+   1.87,
+   10437
+  ],
+  [
+   "kickass",
+   1.85,
+   579
+  ],
+  [
+   "dope",
+   1.82,
+   3267
+  ],
+  [
+   "haunting",
+   1.81,
+   1974
+  ],
+  [
+   "adrenaline",
+   1.74,
+   2028
+  ],
+  [
+   "gr8",
+   1.68,
+   645
+  ]
+ ]
+}

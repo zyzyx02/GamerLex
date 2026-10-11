@@ -1,0 +1,114 @@
+GamerLex v1.0 :: build report (2026-10-11)
+============================================================
+Corpus: 4,691,606 Steam reviews; train 3,261,496, validation 465,514, test 931,196; excluded (contain benchmark sentences) 2,148; empty 31,252.
+Share of recommending reviews: train 0.8144, test 0.8145.
+
+Lexicon: 8046 entries = 4223 curated (candidates 4344, dropped 121) + 3823 in the automatic tier.
+  by tier:     core 3593, extended 436, vader_override 194, auto 3823
+  by category: general 3823, mechanic 2861, reaction 603, industry 390, skill 170, toxic 150, meta 49
+  median training reviews per entry: 436
+  multi-word terms: 281; also in VADER: 292, of which sign differs from VADER: 178.
+  valence <= -0.5: 2771; between: 2227; >= +0.5: 3048.
+  dropped: fewer than 5 training reviews: 85; not matchable by the reference tokenizer: 19; override candidate with clearly negative corpus association (VADER value retained): 17
+
+Scaling to the VADER range: 1449 anchor words (in VADER, not in GamerLex, >= 500 training reviews).
+  Pearson 0.535, Spearman 0.542, sign agreement 0.729.
+  slopes: single 1.293; positive side 1.275; negative side 1.320.
+  validation AUC: single 0.7796, piecewise 0.7805  ->  chosen: piecewise
+
+Override tier: 194 terms; mean VADER valence -2.00, mean GamerLex valence +0.37; sign differs for 72.7%.
+
+Automatic tier: 3823 words (1695 negative, 2128 positive). Rule: content word made of letters, not in VADER, not in the curated tiers, >= 100 training reviews, |z| >= 5, |valence| >= 0.5.
+  token classes among the induced candidates: content 12471, proper_noun 870, other_form 349, function 346, digit 245, short 148
+  most frequent: just (-0.76), story (+0.75), bit (+1.02), buy (-0.68), different (+0.73), experience (+0.57), music (+0.93), work (-0.66), short (+0.50), characters (+0.66), overall (+0.85), world (+0.67), money (-1.34), simple (+0.89), puzzles (+0.67), style (+0.87), art (+0.78), controls (-0.68), maybe (-0.50), bought (-0.62), trying (-0.63), unique (+1.45), puzzle (+0.75), life (+0.59), instead (-0.90)
+
+Review-level evaluation on 99,389 held-out reviews (target: recommended yes/no); 62.8% contain at least one curated term, 81.2% a term of any tier.
+  variant                                 entries     AUC  AUCstr    AUC*  bal.acc  coverage
+  VADER                                         0  0.7495  0.8245  0.7596   0.6974    0.8952
+  VADER + core                               3593  0.7912  0.8509  0.8023   0.7438    0.9217
+  VADER + core + extended                    4029  0.7961  0.8538  0.8074   0.7484    0.9228
+  VADER + GamerLex curated                   4223  0.7856  0.8674  0.8078   0.7385    0.9230
+  VADER + auto tier                          3823  0.8088  0.8656  0.8197   0.7520    0.9365
+  VADER + GamerLex full                      8046  0.8292  0.8930  0.8478   0.7789    0.9521
+  GamerLex full only                         8046  0.8003  0.7933  0.8246   0.7468    0.8085
+  VADER + induced (new words)               12414  0.8594  0.8915  0.8658   0.8069    0.9769
+  VADER + induced (all frequent words)      14429  0.8985  0.9137  0.8974   0.8378    0.9767
+  AUCstr = AUC computed within review-length bands and averaged (weights: positive-negative pairs per band).
+  AUC* = only reviews with at least one curated GamerLex term. Coverage = share of reviews with a non-zero score.
+  Differences from VADER with 95% bootstrap CI (200 resamples):
+    VADER + core                           AUC +0.0418 [+0.0397, +0.0433]   AUCstr +0.0264 [+0.0249, +0.0276]
+    VADER + core + extended                AUC +0.0466 [+0.0444, +0.0482]   AUCstr +0.0293 [+0.0278, +0.0307]
+    VADER + GamerLex curated               AUC +0.0361 [+0.0339, +0.0382]   AUCstr +0.0430 [+0.0414, +0.0446]
+    VADER + auto tier                      AUC +0.0593 [+0.0570, +0.0615]   AUCstr +0.0412 [+0.0396, +0.0427]
+    VADER + GamerLex full                  AUC +0.0797 [+0.0765, +0.0827]   AUCstr +0.0685 [+0.0665, +0.0706]
+    GamerLex full only                     AUC +0.0509 [+0.0456, +0.0556]   AUCstr -0.0311 [-0.0361, -0.0257]
+    VADER + induced (new words)            AUC +0.1099 [+0.1067, +0.1137]   AUCstr +0.0671 [+0.0641, +0.0697]
+    VADER + induced (all frequent words)   AUC +0.1491 [+0.1454, +0.1532]   AUCstr +0.0892 [+0.0857, +0.0925]
+  Paired differences between lexicons (same 200 resamples):
+    VADER + GamerLex full minus VADER + induced (new words): AUC -0.0302 [-0.0328, -0.0281]   AUCstr +0.0015 [-0.0000, +0.0032]
+    VADER + GamerLex full minus VADER + induced (all frequent words): AUC -0.0693 [-0.0728, -0.0661]   AUCstr -0.0207 [-0.0227, -0.0189]
+    VADER + GamerLex full minus VADER + GamerLex curated: AUC +0.0436 [+0.0416, +0.0456]   AUCstr +0.0256 [+0.0244, +0.0269]
+    VADER + GamerLex full minus VADER + auto tier: AUC +0.0204 [+0.0184, +0.0220]   AUCstr +0.0274 [+0.0260, +0.0287]
+    VADER + GamerLex curated minus VADER + induced (new words): AUC -0.0738 [-0.0770, -0.0709]   AUCstr -0.0241 [-0.0260, -0.0216]
+    VADER + GamerLex curated minus VADER + induced (all frequent words): AUC -0.1129 [-0.1172, -0.1094]   AUCstr -0.0463 [-0.0488, -0.0434]
+  Induced baseline: the 30,000 most frequent tokens, valence computed the same way, kept if |z| >= 3: 14,429 entries (12,414 not in VADER; 1,463 also in GamerLex).
+  Note: GamerLex valences were learned from recommendations in the training part; VADER uses no such information.
+
+By genre (test sample; each review carries one genre label; genres with fewer than 200 test reviews are not shown):
+  genre                n   rec.  mean VADER  mean full  AUCstr VADER  curated    full
+  Action           60008  0.808      +0.388     +0.422        0.8207   0.8669  0.8908
+  Adventure        17634  0.834      +0.498     +0.532        0.8275   0.8613  0.8928
+  Casual            7237  0.849      +0.505     +0.506        0.8266   0.8615  0.8888
+  Puzzle             860  0.855      +0.492     +0.541        0.8461   0.8783  0.8991
+  RPG               3027  0.786      +0.447     +0.470        0.8255   0.8721  0.9013
+  Racing            1049  0.802      +0.439     +0.401        0.8628   0.8833  0.9049
+  Simulation        6935  0.790      +0.413     +0.383        0.8291   0.8762  0.8993
+  Sports             250  0.828      +0.470     +0.435        0.8852   0.9229  0.9432
+  Strategy          2191  0.772      +0.425     +0.448        0.8190   0.8624  0.8956
+  Spearman across 9 genres between recommending share and mean score: VADER +0.700, GamerLex full +0.583.
+
+Third rater file: used (1481 sentences rated).
+Rater agreement: A1-A2 Spearman 0.5432; Krippendorff's alpha (interval) two raters 0.4516, (ordinal) 0.4741; three raters 0.5829 (interval), 0.5993 (ordinal).
+  A1-A2: Spearman 0.5432, exact 0.285, within one point 0.734
+  A1-GT: Spearman 0.7272, exact 0.388, within one point 0.845
+  A2-GT: Spearman 0.6456, exact 0.521, within one point 0.915
+  each rater against the mean of the other two (Spearman): A1 0.7109, A2 0.6304, GT 0.7840
+Sentence-level evaluation on 1462 benchmark sentences (Spearman with the mean of two annotators; difference from VADER with 95% bootstrap CI, 1000 resamples):
+  VADER                                   0.5706   coverage 0.8454   sign acc. 0.6335
+  VADER + core                            0.6149   coverage 0.9371   sign acc. 0.7130   +0.0443 [+0.0286, +0.0604]
+  VADER + core + extended                 0.6199   coverage 0.9405   sign acc. 0.7202   +0.0494 [+0.0330, +0.0660]
+  VADER + GamerLex curated                0.6392   coverage 0.9405   sign acc. 0.7146   +0.0686 [+0.0456, +0.0899]
+  VADER + auto tier                       0.6152   coverage 0.9425   sign acc. 0.7242   +0.0446 [+0.0253, +0.0632]
+  VADER + GamerLex full                   0.6604   coverage 0.9795   sign acc. 0.7663   +0.0898 [+0.0624, +0.1157]
+  GamerLex full only                      0.4158   coverage 0.9008   sign acc. 0.6248   -0.1548 [-0.2086, -0.0995]
+  VADER + induced (new words)             0.6257   coverage 0.9993   sign acc. 0.7695   +0.0551 [+0.0247, +0.0849]
+  VADER + induced (all frequent words)    0.6249   coverage 0.9993   sign acc. 0.7886   +0.0543 [+0.0122, +0.0967]
+  sign acc. = share of the 1258 sentences with a non-zero gold rating where the score has the same sign.
+  paired: VADER + GamerLex full minus VADER + induced (new words): +0.0347 [+0.0139, +0.0576]
+  paired: VADER + GamerLex full minus VADER + induced (all frequent words): +0.0355 [+0.0052, +0.0650]
+  paired: VADER + GamerLex full minus VADER + GamerLex curated: +0.0212 [+0.0057, +0.0384]
+  paired: VADER + GamerLex full minus VADER + auto tier: +0.0452 [+0.0279, +0.0624]
+  paired: VADER + GamerLex curated minus VADER + induced (new words): +0.0135 [-0.0131, +0.0404]
+  paired: VADER + GamerLex curated minus VADER + induced (all frequent words): +0.0143 [-0.0208, +0.0484]
+Sentence-level evaluation on 1462 benchmark sentences (Spearman with the median of three raters; difference from VADER with 95% bootstrap CI, 1000 resamples):
+  VADER                                   0.5787   coverage 0.8454   sign acc. 0.7256
+  VADER + core                            0.6176   coverage 0.9371   sign acc. 0.7980   +0.0389 [+0.0231, +0.0561]
+  VADER + core + extended                 0.6241   coverage 0.9405   sign acc. 0.8090   +0.0454 [+0.0283, +0.0632]
+  VADER + GamerLex curated                0.6455   coverage 0.9405   sign acc. 0.8035   +0.0668 [+0.0444, +0.0879]
+  VADER + auto tier                       0.6225   coverage 0.9425   sign acc. 0.7947   +0.0437 [+0.0250, +0.0623]
+  VADER + GamerLex full                   0.6638   coverage 0.9795   sign acc. 0.8364   +0.0851 [+0.0582, +0.1115]
+  GamerLex full only                      0.4073   coverage 0.9008   sign acc. 0.6509   -0.1715 [-0.2270, -0.1172]
+  VADER + induced (new words)             0.6338   coverage 0.9993   sign acc. 0.8364   +0.0551 [+0.0238, +0.0838]
+  VADER + induced (all frequent words)    0.6197   coverage 0.9993   sign acc. 0.8430   +0.0410 [-0.0016, +0.0813]
+  sign acc. = share of the 911 sentences with a non-zero gold rating where the score has the same sign.
+  paired: VADER + GamerLex full minus VADER + induced (new words): +0.0300 [+0.0087, +0.0514]
+  paired: VADER + GamerLex full minus VADER + induced (all frequent words): +0.0441 [+0.0156, +0.0739]
+  paired: VADER + GamerLex full minus VADER + GamerLex curated: +0.0183 [+0.0027, +0.0343]
+  paired: VADER + GamerLex full minus VADER + auto tier: +0.0414 [+0.0254, +0.0581]
+  paired: VADER + GamerLex curated minus VADER + induced (new words): +0.0117 [-0.0145, +0.0375]
+  paired: VADER + GamerLex curated minus VADER + induced (all frequent words): +0.0258 [-0.0078, +0.0595]
+
+Most negative curated terms (>= 500 training reviews): abandonware (-3.79), scammed (-3.43), refund (-3.37), refunded (-3.22), unplayable (-3.18), dogshit (-3.09), garbage (-2.98), refunds (-2.95), turd (-2.94), unfun (-2.89), uninspiring (-2.64), unenjoyable (-2.64), uninteresting (-2.60), uninspired (-2.53), shite (-2.51)
+Most positive curated terms (>= 500 training reviews): pog (+2.88), banger (+2.67), poggers (+2.53), goated (+2.51), noice (+2.28), monke (+2.14), sweating (+2.09), terrifying (+1.92), multiple endings (+1.89), hooked (+1.87), kickass (+1.85), dope (+1.82), haunting (+1.81), adrenaline (+1.74), gr8 (+1.68)
+Most negative automatic-tier words (>= 500 training reviews): uninstalled (-3.11), requested (-3.10), requesting (-2.98), pos (-2.94), redeeming (-2.93), uninstalling (-2.92), steaming (-2.90), refunding (-2.89), straw (-2.69), conscience (-2.68), unrewarding (-2.60), unimaginative (-2.59), poorly (-2.49), uninstall (-2.45), dissapointment (-2.39)
+Most positive automatic-tier words (>= 500 training reviews): underrated (+3.63), must-buy (+3.54), must-play (+3.17), must-have (+3.13), immerses (+3.04), addicting (+2.92), addictive (+2.82), unforgettable (+2.70), wholesome (+2.66), loveable (+2.62), brrr (+2.56), goosebumps (+2.50), chilled (+2.49), mesmerizing (+2.47), deceptively (+2.45)

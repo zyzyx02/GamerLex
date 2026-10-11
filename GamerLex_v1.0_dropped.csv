@@ -1,0 +1,122 @@
+﻿word,tier,slang_type,n_train,assoc,z,vader_valence,reason
+ludicrous,vader_override,reaction,774,-0.1447115288509978,-9.076355173983513,-1.5,override candidate with clearly negative corpus association (VADER value retained)
+ridiculous,vader_override,reaction,11748,-0.22168545174187781,-54.664836294248275,-1.5,override candidate with clearly negative corpus association (VADER value retained)
+ridiculously,vader_override,reaction,4998,-0.13801243854026513,-22.246247408406045,-1.4,override candidate with clearly negative corpus association (VADER value retained)
+stupidly,vader_override,reaction,2131,-0.19287660247024174,-20.426438254105737,-2.0,override candidate with clearly negative corpus association (VADER value retained)
+assaulted,vader_override,mechanic,248,-0.11462958821485336,-4.098222687861756,-2.4,override candidate with clearly negative corpus association (VADER value retained)
+attacked,vader_override,mechanic,4037,-0.11817020574572057,-16.788852844538244,-2.0,override candidate with clearly negative corpus association (VADER value retained)
+blocking,vader_override,mechanic,3732,-0.11662674576030718,-15.928070299062803,-1.6,override candidate with clearly negative corpus association (VADER value retained)
+defeats,vader_override,mechanic,823,-0.17049471162697816,-11.000072968021298,-1.3,override candidate with clearly negative corpus association (VADER value retained)
+killed,vader_override,mechanic,19062,-0.13257913688665346,-41.9124057639471,-3.5,override candidate with clearly negative corpus association (VADER value retained)
+offence,vader_override,mechanic,321,-0.1125693176868029,-4.539250927328479,-1.2,override candidate with clearly negative corpus association (VADER value retained)
+altaholic,core,mechanic,3,0.2750375444289297,1.0671897371873138,,fewer than 5 training reviews
+altoholic,core,mechanic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+bming,core,toxic,2,0.24291265175180976,0.80161730861617,,fewer than 5 training reviews
+cheeser,core,toxic,2,0.30348926997200865,0.9335181424693128,,fewer than 5 training reviews
+choob,core,skill,1,0.2588472967428149,0.5909734474911627,,fewer than 5 training reviews
+consolize,core,industry,2,-0.729010017492599,-2.3204235039918855,,fewer than 5 training reviews
+dkp,core,mechanic,2,0.14487906422091124,0.5873437536922934,,fewer than 5 training reviews
+facecheck,core,mechanic,1,0.09798923771754109,0.3295970606001665,,fewer than 5 training reviews
+freelo,core,skill,1,0.2269780067608046,0.541871068490637,,fewer than 5 training reviews
+froob,core,skill,1,0.2269780067608046,0.541871068490637,,fewer than 5 training reviews
+glitcher,core,toxic,3,-0.0925879441809685,-0.37734771503673564,,fewer than 5 training reviews
+gosu,core,skill,4,0.14495791952082993,0.8274541909916981,,fewer than 5 training reviews
+h4x,core,toxic,3,0.2594636096560924,1.0315961124022865,,fewer than 5 training reviews
+hackusation,core,toxic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+haxorz,core,toxic,0,,,,fewer than 5 training reviews
+haxzor,core,toxic,1,0.2269780067608046,0.541871068490637,,fewer than 5 training reviews
+l-cancel,core,mechanic,2,-0.21883171664258816,-0.6892304143657465,,fewer than 5 training reviews
+laner,core,mechanic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+learn2play,core,skill,0,,,,fewer than 5 training reviews
+n00bie,core,skill,0,,,,fewer than 5 training reviews
+nooblet,core,skill,1,0.28313266827198713,0.6284570407143333,,fewer than 5 training reviews
+noobtube,core,skill,4,-0.012150388299935755,-0.05749597317508741,,fewer than 5 training reviews
+nube,core,skill,4,-0.21177818130300752,-0.9353145816859009,,fewer than 5 training reviews
+nubie,core,skill,0,,,,fewer than 5 training reviews
+nublet,core,skill,1,0.2588472967428149,0.5909734474911627,,fewer than 5 training reviews
+ownd,core,skill,2,0.17944822645341207,0.6664827551638224,,fewer than 5 training reviews
+pentakill,core,mechanic,4,0.000418263165500532,0.0019557013775521387,,fewer than 5 training reviews
+pker,core,mechanic,2,-0.19651073002799135,-0.6044573888491631,,fewer than 5 training reviews
+poopsock,core,mechanic,0,,,,fewer than 5 training reviews
+popamole,core,mechanic,4,-0.2318881895630962,-1.0491332733825816,,fewer than 5 training reviews
+powergamer,core,skill,4,0.2700077900501133,1.2175059418267662,,fewer than 5 training reviews
+pubby,core,skill,1,0.2269780067608046,0.541871068490637,,fewer than 5 training reviews
+pwnt,core,skill,3,0.2886086122289441,1.1044088247570383,,fewer than 5 training reviews
+squeeker,core,toxic,0,,,,fewer than 5 training reviews
+tker,core,toxic,1,-0.7730219932391954,-1.8454574494731102,,fewer than 5 training reviews
+trickshotter,core,skill,1,0.15815510349547823,0.433436582695144,,fewer than 5 training reviews
+vertically-scrolling,core,mechanic,3,0.2967037360720015,1.1252494996759776,,fewer than 5 training reviews
+credit-feeding,core,mechanic,4,0.2984001195470033,1.304563859950989,,fewer than 5 training reviews
+cross-buy,core,mechanic,3,-0.062133351665066505,-0.24271106227892378,,fewer than 5 training reviews
+dbno,core,mechanic,2,0.28116828335741184,0.8855651064577904,,fewer than 5 training reviews
+fumblecore,core,mechanic,2,-0.21883171664258816,-0.6892304143657465,,fewer than 5 training reviews
+igl,core,mechanic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+metastory,core,mechanic,2,0.2374507794981342,0.7937523885082187,,fewer than 5 training reviews
+platting,core,mechanic,1,-0.6965107300279914,-1.514928846087835,,fewer than 5 training reviews
+rendezook,core,mechanic,1,-0.6965107300279914,-1.514928846087835,,fewer than 5 training reviews
+2.5d graphics,core,mechanic,0,,,,not matchable by the reference tokenizer
+advance and secure,core,mechanic,2,-0.19651073002799135,-0.6044573888491631,,fewer than 5 training reviews
+borderless fullscreen windowed,core,mechanic,2,0.24291265175180976,0.80161730861617,,fewer than 5 training reviews
+compulsion loop,core,mechanic,0,,,,fewer than 5 training reviews
+cpu versus cpu,core,mechanic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+damage per minute,core,mechanic,3,-0.4220837147536389,-1.7077115432414254,,fewer than 5 training reviews
+dialog wheel,core,mechanic,2,-0.6965107300279914,-2.142432920167639,,fewer than 5 training reviews
+dummied out,core,mechanic,4,-0.4515998804529967,-1.9743319275191058,,fewer than 5 training reviews
+elo hell,core,mechanic,1,0.2588472967428149,0.5909734474911627,,fewer than 5 training reviews
+extraction shooter,core,mechanic,1,0.19176889072428127,0.48710355224969815,,fewer than 5 training reviews
+first-party developer,core,mechanic,1,0.28313266827198713,0.6284570407143333,,fewer than 5 training reviews
+gone gold,core,mechanic,4,0.042328776664710244,0.18629737845321,,fewer than 5 training reviews
+hack vs hack,core,mechanic,1,-0.7411527032571851,-1.692123401220922,,fewer than 5 training reviews
+head swap,core,mechanic,2,-0.19651073002799135,-0.6044573888491631,,fewer than 5 training reviews
+in-game leader,core,mechanic,2,0.2374507794981342,0.7937523885082187,,fewer than 5 training reviews
+kill farming,core,mechanic,0,,,,fewer than 5 training reviews
+kill-death ratio,core,mechanic,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+live service games,core,mechanic,3,-0.40356180884145737,-1.591509057693146,,fewer than 5 training reviews
+multiple character control,core,mechanic,0,,,,fewer than 5 training reviews
+noclip mode,core,mechanic,4,-0.20668903087800206,-0.9081919618544814,,fewer than 5 training reviews
+pack-in game,core,mechanic,1,0.2588472967428149,0.5909734474911627,,fewer than 5 training reviews
+pick-up group,core,mechanic,0,,,,fewer than 5 training reviews
+player versus environment,core,mechanic,3,0.2967037360720015,1.1252494996759776,,fewer than 5 training reviews
+rom hacking,core,mechanic,3,0.2269780067608046,0.9385482217774181,,fewer than 5 training reviews
+show mode,core,mechanic,2,0.28313266827198713,0.8887724703470705,,fewer than 5 training reviews
+side-scrolling video game,core,mechanic,2,0.2374507794981342,0.7937523885082187,,fewer than 5 training reviews
+simulation video game,core,mechanic,3,0.28991820217199427,1.10698397470916,,fewer than 5 training reviews
+stat squish,core,mechanic,1,-0.6965107300279914,-1.514928846087835,,fewer than 5 training reviews
+tower dive,core,mechanic,2,-0.20668903087800206,-0.642188694846418,,fewer than 5 training reviews
+virtual economy,core,mechanic,4,0.02706132538969408,0.12096515740710535,,fewer than 5 training reviews
+zero-player game,core,mechanic,3,-0.4103473427414645,-1.6301647711820426,,fewer than 5 training reviews
+>:3,core,reaction,0,,,,not matchable by the reference tokenizer
+ps+,core,industry,0,,,,not matchable by the reference tokenizer
+blocked,vader_override,mechanic,2467,-0.18714100812716827,-20.82575965623626,-1.1,override candidate with clearly negative corpus association (VADER value retained)
+crushes,vader_override,skill,343,-0.1366890957309228,-5.906763052202756,-1.9,override candidate with clearly negative corpus association (VADER value retained)
+destroyed,vader_override,skill,6524,-0.10335230368940385,-18.89981728029814,-2.2,override candidate with clearly negative corpus association (VADER value retained)
+destroys,vader_override,mechanic,1452,-0.21171755070317977,-18.314971806087613,-2.6,override candidate with clearly negative corpus association (VADER value retained)
+kills,vader_override,mechanic,9624,-0.14763076304287648,-32.91568628403465,-2.5,override candidate with clearly negative corpus association (VADER value retained)
+punished,vader_override,mechanic,2092,-0.15192887978287317,-15.50076619664189,-2.0,override candidate with clearly negative corpus association (VADER value retained)
+punishes,vader_override,mechanic,1330,-0.2185765798631576,-17.879577972634852,-2.1,override candidate with clearly negative corpus association (VADER value retained)
+cliché,extended,reaction,0,,,,not matchable by the reference tokenizer
+clichéd,extended,reaction,0,,,,not matchable by the reference tokenizer
+clichés,extended,reaction,0,,,,not matchable by the reference tokenizer
+sh.t,extended,reaction,0,,,,not matchable by the reference tokenizer
+awesoooome,extended,reaction,3,0.14055885819594727,0.7048561720422645,,fewer than 5 training reviews
+100%-ing,core,skill,0,,,,not matchable by the reference tokenizer
+100%ed,core,skill,0,,,,not matchable by the reference tokenizer
+360°,core,mechanic,0,,,,not matchable by the reference tokenizer
+<33,core,reaction,0,,,,not matchable by the reference tokenizer
+amogusamogus,core,reaction,1,0.30348926997200865,0.6600970089007206,,fewer than 5 training reviews
+any%,core,skill,0,,,,not matchable by the reference tokenizer
+bada$$,core,reaction,0,,,,not matchable by the reference tokenizer
+dev(s),core,industry,0,,,,not matchable by the reference tokenizer
+dev`s,core,industry,0,,,,not matchable by the reference tokenizer
+developer(s),core,industry,0,,,,not matchable by the reference tokenizer
+developer(s?),core,industry,0,,,,not matchable by the reference tokenizer
+fotm,core,meta,3,-0.062133351665066505,-0.24271106227892378,,fewer than 5 training reviews
+gamgud,core,skill,1,0.19176889072428127,0.48710355224969815,,fewer than 5 training reviews
+inting,core,mechanic,2,-0.29062655125745707,-1.011138656688615,,fewer than 5 training reviews
+johning,core,mechanic,0,,,,fewer than 5 training reviews
+no johns,core,mechanic,1,0.09798923771754109,0.3295970606001665,,fewer than 5 training reviews
+p-rank,core,mechanic,3,0.21101888749724884,0.9033493887649179,,fewer than 5 training reviews
+r.i.p,core,reaction,0,,,,not matchable by the reference tokenizer
+s++,core,mechanic,0,,,,not matchable by the reference tokenizer
+stream-sniping,core,mechanic,1,-0.7168673317280129,-1.5911986583257205,,fewer than 5 training reviews
+trickjump,core,mechanic,2,-0.7168673317280129,-2.2502947230341066,,fewer than 5 training reviews
