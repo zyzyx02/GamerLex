@@ -266,30 +266,43 @@ def score_texts(analyzer, texts):
     return np.array([analyzer.polarity_scores(t)["compound"] for t in texts], dtype=float)
 
 
-HELPER_PY = '''# -*- coding: utf-8 -*-
+HELPER_PY = r'''# -*- coding: utf-8 -*-
 """GamerLex helper: use the lexicon together with VADER.
 
-    from gamerlex import GamerLexAnalyzer
-    gl = GamerLexAnalyzer("GamerLex_v1.0.csv")           # all four tiers
-    gl.polarity_scores("gg, the boss fights slap but the netcode is janky")
+In Python:
 
-    gl = GamerLexAnalyzer("GamerLex_v1.0.csv", tiers=CURATED)     # hand-audited tiers only
-    gl = GamerLexAnalyzer("GamerLex_v1.0.csv", tiers=("core",))   # one tier only
+    from gamerlex import GamerLexAnalyzer
+    gl = GamerLexAnalyzer()                                  # all four tiers
+    gl.polarity_scores("gg, the boss fights slap but the netcode is janky")
+    gl.matches("gg, the boss fights slap but the netcode is janky")
+
+    gl = GamerLexAnalyzer(tiers=CURATED)                     # hand-audited tiers only
+    gl = GamerLexAnalyzer(tiers=("core",))                   # one tier only
+
+From the command line:
+
+    python gamerlex.py "gg, the boss fights slap but the netcode is janky"
+    python gamerlex.py --curated "first text" "second text"
+    python gamerlex.py < my_texts.txt                        # one text per line
 
 Requires: vaderSentiment.
 """
 import csv
+import os
 import re
+import sys
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 CURATED = ("core", "extended", "vader_override")
 ALL_TIERS = CURATED + ("auto",)
+DEFAULT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "GamerLex_v1.0.csv")
+_TOKEN = re.compile(r"[a-z0-9'*_-]+")
 
 
 class GamerLexAnalyzer:
-    def __init__(self, path="GamerLex_v1.0.csv", tiers=ALL_TIERS, use_vader=True):
+    def __init__(self, path=DEFAULT_PATH, tiers=ALL_TIERS, use_vader=True):
         self.entries = {}
         multi = []
         with open(path, encoding="utf-8-sig", newline="") as f:
@@ -303,10 +316,10 @@ class GamerLexAnalyzer:
         self.analyzer = SentimentIntensityAnalyzer()
         self.analyzer.lexicon = dict(self.analyzer.lexicon) if use_vader else {}
         self.analyzer.lexicon.update(self.entries)
-        self._ws = re.compile(r"\\s+")
+        self._ws = re.compile(r"\s+")
         if multi:
             parts = sorted(multi, key=len, reverse=True)
-            pat = "|".join(r"\\s+".join(re.escape(w) for w in t.split()) for t in parts)
+            pat = "|".join(r"\s+".join(re.escape(w) for w in t.split()) for t in parts)
             self._rx = re.compile(r"(?<![A-Za-z0-9_])(?:" + pat + r")(?![A-Za-z0-9_])", re.IGNORECASE)
         else:
             self._rx = None
@@ -318,8 +331,133 @@ class GamerLexAnalyzer:
         return self._rx.sub(lambda m: self._ws.sub("_", m.group(0)), text)
 
     def polarity_scores(self, text):
+        """VADER scores (neg, neu, pos, compound) with the GamerLex entries added."""
         return self.analyzer.polarity_scores(self.join_multiword(text))
+
+    def matches(self, text):
+        """GamerLex terms found in the text, in order, as (term, valence) pairs."""
+        out = []
+        for tok in _TOKEN.findall(self.join_multiword(text).lower()):
+            tok = tok.strip("'-*")
+            if tok in self.entries:
+                out.append((tok.replace("_", " "), self.entries[tok]))
+        return out
+
+
+def _main(argv):
+    tiers = ALL_TIERS
+    if "--curated" in argv:
+        tiers = CURATED
+        argv = [a for a in argv if a != "--curated"]
+    texts = argv if argv else [line.strip() for line in sys.stdin if line.strip()]
+    if not texts:
+        print(__doc__)
+        return
+    gl = GamerLexAnalyzer(tiers=tiers)
+    vader = SentimentIntensityAnalyzer()
+    for t in texts:
+        s = gl.polarity_scores(t)
+        terms = ", ".join(f"{w} ({v:+.2f})" for w, v in gl.matches(t)) or "none"
+        print(t)
+        print(f"  VADER compound:            {vader.polarity_scores(t)['compound']:+.4f}")
+        print(f"  VADER + GamerLex compound: {s['compound']:+.4f}  (neg {s['neg']:.3f}, neu {s['neu']:.3f}, pos {s['pos']:.3f})")
+        print(f"  GamerLex terms:            {terms}")
+
+
+if __name__ == "__main__":
+    _main(sys.argv[1:])
 '''
+
+
+EXAMPLES = [
+    "gg, the boss fights are brutal and the horror is terrifying",
+    "this game is pay to win and the devs abandoned it",
+    "absolute banger, the gunplay is crisp and the grind is worth it",
+]
+
+
+def usage_section(outdir, base, tok_pattern):
+    """A README 'Usage' resze. A peldakimenetet a kiadott gamerlex.py-vel szamolja ki."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gamerlex_release_helper", os.path.join(outdir, "gamerlex.py"))
+    mod = importlib.util.module_from_spec(spec)
+    _dwb = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True          # ne keruljon __pycache__ a release mappaba
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        sys.dont_write_bytecode = _dwb
+    gl = mod.GamerLexAnalyzer(os.path.join(outdir, base + ".csv"))
+    vader = mod.SentimentIntensityAnalyzer()
+    out_lines = []
+    for t in EXAMPLES:
+        s = gl.polarity_scores(t)
+        terms = ", ".join(f"{w} ({v:+.2f})" for w, v in gl.matches(t)) or "none"
+        out_lines += [t,
+                      f"  VADER compound:            {vader.polarity_scores(t)['compound']:+.4f}",
+                      f"  VADER + GamerLex compound: {s['compound']:+.4f}  (neg {s['neg']:.3f}, neu {s['neu']:.3f}, pos {s['pos']:.3f})",
+                      f"  GamerLex terms:            {terms}"]
+    try:
+        from importlib.metadata import version as _v
+        vader_ver = _v("vaderSentiment")
+    except Exception:
+        vader_ver = "unknown"
+    args_cli = " ".join('"' + t + '"' for t in EXAMPLES)
+    snippet = 'sia.lexicon.update({t: float(v) for t, v in (line.rstrip("\\n").split("\\t") for line in f)})'
+    fence = "`" * 3
+    return f"""## Usage
+
+Install the one dependency with `pip install vaderSentiment`, then run the helper from the folder that contains `gamerlex.py` and `{base}.csv`.
+
+### Scoring your own text from the command line
+
+{fence}
+python gamerlex.py "your own text here"
+python gamerlex.py --curated "first text" "second text"    # without the automatic tier
+python gamerlex.py < my_texts.txt                          # one text per line
+{fence}
+
+Running `python gamerlex.py {args_cli}` gives:
+
+{fence}
+""" + "\n".join(out_lines) + f"""
+{fence}
+
+The example sentences were written for this README; they are not taken from the review corpus. The output was produced when this release was built (vaderSentiment {vader_ver}); other versions of vaderSentiment may give slightly different VADER scores. *VADER compound* uses VADER alone, *VADER + GamerLex compound* uses VADER with all four GamerLex tiers, and *GamerLex terms* lists the entries found in the text with their valence on VADER's -4 to +4 scale.
+
+### Scoring your own text in Python
+
+{fence}python
+from gamerlex import GamerLexAnalyzer, CURATED
+
+gl = GamerLexAnalyzer()                          # all four tiers; finds {base}.csv next to gamerlex.py
+text = "your own text here"
+print(gl.polarity_scores(text))                  # {{'neg': ..., 'neu': ..., 'pos': ..., 'compound': ...}}
+print(gl.matches(text))                          # [(term, valence), ...]
+
+gl_curated = GamerLexAnalyzer(tiers=CURATED)     # without the automatic tier
+scores = [gl.polarity_scores(t)["compound"] for t in ["first text", "second text"]]
+{fence}
+
+`polarity_scores` returns VADER's four scores; `compound` runs from -1 (most negative) to +1 (most positive).
+
+### Without the helper
+
+Single-word entries can be added to VADER directly (use `{base}_curated_vader.txt` to leave out the automatic tier). Multi-word terms are stored with underscores, so they only match if the text is joined the same way, which is what `gamerlex.py` does.
+
+{fence}python
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+sia = SentimentIntensityAnalyzer()
+with open("{base}_vader.txt", encoding="utf-8") as f:
+    {snippet}
+{fence}
+
+Reference tokenizer used for all counts: lower-casing followed by the regular expression `{tok_pattern}`.
+
+When reading `{base}.csv` with pandas, pass `keep_default_na=False`: the lexicon contains the term *null*, which pandas would otherwise read as a missing value.
+
+"""
 
 
 # ---------------------------------------------------------------- fo program
@@ -1217,7 +1355,7 @@ Built on {results['built']}. All numbers in this file were produced by `gamerlex
 | `{base}_vader.txt` | Tab-separated `term<TAB>valence`, all tiers, loadable into VADER (multi-word terms joined with `_`) |
 | `{base}_curated_vader.txt` | The same without the automatic tier |
 | `{base}.json` | Term, valence, tier and category as JSON |
-| `gamerlex.py` | Helper class that plugs the lexicon into VADER and handles multi-word terms |
+| `gamerlex.py` | Helper that plugs the lexicon into VADER, handles multi-word terms and scores your own text from Python or the command line |
 | `{base}_results.json` | Every figure reported here, machine readable |
 | `{base}_anchors.csv` | Anchor words used for scaling to the VADER range |
 | `{base}_dropped.csv` | Candidate entries removed by the build filters, with the reason |
@@ -1290,33 +1428,7 @@ Sign accuracy is computed on sentences with a non-zero gold rating. {agr_txt} Th
     readme += f"""
 In the override tier ({ovr_summary['n']} terms) the mean VADER valence is {ovr_summary['mean_vader_valence']:+.2f} and the mean GamerLex valence is {ovr_summary['mean_gamerlex_valence']:+.2f}; the sign differs for {ovr_summary['share_sign_differs']:.1%} of the terms.
 
-## Usage
-
-```python
-from gamerlex import GamerLexAnalyzer
-
-gl = GamerLexAnalyzer("{base}.csv")                      # all four tiers
-print(gl.polarity_scores("gg, the boss fights are brutal and the horror is terrifying"))
-
-from gamerlex import CURATED
-gl_curated = GamerLexAnalyzer("{base}.csv", tiers=CURATED)   # without the automatic tier
-```
-
-Without the helper, single-word entries can be added to VADER directly (use `{base}_curated_vader.txt` to leave out the automatic tier):
-
-```python
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-sia = SentimentIntensityAnalyzer()
-with open("{base}_vader.txt", encoding="utf-8") as f:
-    {snippet}
-```
-
-Reference tokenizer used for all counts: lower-casing followed by the regular expression `{TOK.pattern}`.
-
-When reading `{base}.csv` with pandas, pass `keep_default_na=False`: the lexicon contains the term *null*, which pandas would otherwise read as a missing value.
-
-## Limitations
+""" + usage_section(outdir, base, TOK.pattern) + f"""## Limitations
 
 - Valence is derived from review-level recommendations, so it measures the company a term keeps, which is a proxy for sentence-level sentiment.
 - The automatic tier was not reviewed by hand. It contains aspect and discourse words whose valence reflects typical use in Steam reviews and may not hold in other text types.
